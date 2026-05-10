@@ -1,0 +1,39 @@
+---
+description: Implement a feature end-to-end. Verifies gem APIs (rubysmithing-researcher) → implements (rubysmithing-builder) → quality gate (rubysmithing-auditor).
+argument-hint: "<feature description>"
+allowed-tools: ["Read", "Grep", "Glob", "Write", "Bash", "Agent"]
+---
+
+## Step 1 — Gem Context Verification
+
+Dispatch the `rubysmithing-researcher` agent with:
+
+- Task instructions: `$CLAUDE_PLUGIN_ROOT/tasks/flow/step-1-context.md`
+- Feature description: from arguments
+
+If Step 1 returns `stdlib-only`, skip to Step 2 directly without gem context.
+
+## Step 2 — Implementation
+
+Dispatch the `rubysmithing-builder` with task instructions:
+
+- If the feature is primarily data infrastructure (schema design, migration, chunking pipeline, embedding strategy, RAG retriever, knowledge graph, pgvector, Ohm model, SFL metadata) → uses `$CLAUDE_PLUGIN_ROOT/tasks/schema/step-2-design.md`
+- Otherwise → uses `$CLAUDE_PLUGIN_ROOT/tasks/flow/step-2-implement.md`
+
+Pass to the builder:
+
+- Feature description: from arguments
+- Verified Context Block (or stdlib-only signal): from Step 1
+
+## Step 3 — Quality Gate
+
+Dispatch the `rubysmithing-auditor` with:
+
+- Task instructions: `$CLAUDE_PLUGIN_ROOT/tasks/flow/step-3-verify.md`
+- Implementation files: complete output from Step 2
+
+## Final Output
+
+Present:
+1. Implementation files (Step 2)
+2. Verification verdict (Step 3) — SHIP or NEEDS FIXES with specific items
