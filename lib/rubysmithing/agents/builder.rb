@@ -6,7 +6,6 @@ require_relative "../discovery/blueprint_librarian"
 module Rubysmithing
   module Agents
     class BlueprintSearchTool < RubyLLM::Tool
-      name "blueprint_search"
       description "Searches the Librarian database for known-good architectural blueprints and code patterns."
       param :query, type: :string, desc: "A semantic natural language search query for the code pattern needed."
 
@@ -26,9 +25,7 @@ module Rubysmithing
     end
 
     class Builder < RubyLLM::Agent
-      # We default to OpenRouter for general code generation, leaving Ollama for the Librarian's vector embeddings
-      provider :openrouter 
-      model "google/gemini-2.0-flash-lite-001"
+      model Rubysmithing.config.fetch(:builder_model)
       
       tools BlueprintSearchTool
       
@@ -36,7 +33,7 @@ module Rubysmithing
         You are the Sovereign Builder Agent. Your primary responsibility is generating, refactoring, and structuring Ruby code.
         
         CRITICAL DIRECTIVE: 
-        Before generating any new architectural component, class, or pattern, you MUST use the `blueprint_search` tool 
+        Before generating any new architectural component, class, or pattern, you MUST use the `blueprint_search_tool` 
         to query the Librarian for a "known-good" blueprint. 
         
         If the tool returns a blueprint:

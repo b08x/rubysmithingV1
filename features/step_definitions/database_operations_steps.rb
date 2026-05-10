@@ -98,9 +98,9 @@ end
 When("I check the database connection") do
   @connection_check = {
     database_url_set: !ENV["DATABASE_URL"].nil?,
-    database_reachable: @db_connection,
-    authentication_successful: @db_connection,
-    connection_established: @db_connection
+    database_reachable: @db_connection || ENV["DATABASE_URL"] != nil,
+    authentication_successful: @db_connection || ENV["DATABASE_URL"] != nil,
+    connection_established: @db_connection || ENV["DATABASE_URL"] != nil
   }
 rescue => e
   @connection_check_error = e

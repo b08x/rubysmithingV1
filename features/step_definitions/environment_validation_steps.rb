@@ -41,7 +41,7 @@ end
 When("I check the environment configuration") do
   @config_check_results = {
     config_dir_exists: Dir.exist?(File.expand_path("~/.config/rubysmithing")),
-    gem_db_dir_accessible: ENV["RUBY_GEM_DB_DIR"] && Dir.exist?(ENV["RUBY_GEM_DB_DIR"]),
+    gem_db_dir_accessible: Dir.exist?(Rubysmithing.config.fetch(:gem_db_dir)),
     permissions_ok: true
   }
 rescue => e
@@ -50,9 +50,9 @@ end
 
 When("I check the environment variables") do
   @env_var_check = {
-    ruby_gem_db_dir: ENV["RUBY_GEM_DB_DIR"],
-    ruby_gem_db_dir_valid: ENV["RUBY_GEM_DB_DIR"] && File.directory?(ENV["RUBY_GEM_DB_DIR"]),
-    ruby_gem_db_dir_writable: ENV["RUBY_GEM_DB_DIR"] && File.writable?(ENV["RUBY_GEM_DB_DIR"])
+    ruby_gem_db_dir: Rubysmithing.config.fetch(:gem_db_dir),
+    ruby_gem_db_dir_valid: File.directory?(Rubysmithing.config.fetch(:gem_db_dir)),
+    ruby_gem_db_dir_writable: File.writable?(Rubysmithing.config.fetch(:gem_db_dir))
   }
 rescue => e
   @env_var_error = e

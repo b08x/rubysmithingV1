@@ -12,6 +12,7 @@
 
 require "tmpdir"
 require "fileutils"
+require "open3"
 
 module Rubysmithing
   class BundleTester

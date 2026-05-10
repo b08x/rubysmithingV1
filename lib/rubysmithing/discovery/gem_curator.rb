@@ -13,7 +13,7 @@ module Rubysmithing
       # @param db_path [String, nil] Path to the rubygemdb.sqlite database.
       # @param api_key [String, nil] Context7 API key for SSE connection.
       def initialize(db_path: nil, api_key: nil)
-        @db_path = db_path || File.join(ENV.fetch("RUBY_GEM_DB_DIR"), DEFAULT_DB_NAME)
+        @db_path = db_path || File.join(Rubysmithing.config.fetch(:gem_db_dir), DEFAULT_DB_NAME)
         @db = Sequel.sqlite(@db_path) if File.exist?(@db_path)
         @api_key = api_key || ENV["CONTEXT7_API_KEY"]
 

@@ -26,14 +26,11 @@ module Rubysmithing
       private
 
       def generate_embedding(text)
-        # Configure RubyLLM for OpenRouter/Mistral
-        # Sovereign Decision: Using Mistral Embed via OpenRouter as requested.
-        # We ensure the provider is set to :openrouter.
-        
+        # Use configured provider and model
         RubyLLM.embed(
           text,
-          model: "mistralai/mistral-embed",
-          provider: :openrouter
+          model: Rubysmithing.config.fetch(:rag_embedding_model),
+          provider: Rubysmithing.config.fetch(:rag_embedding_provider).to_sym
         ).vector
       rescue StandardError => e
         # Fallback to deterministic fake vector if API fails/missing to ensure TUI stability

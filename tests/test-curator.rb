@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../plugins/rubysmithing/config/boot"
+require_relative "../config/boot"
 
 curator = Rubysmithing::Discovery::GemCurator.new
 gems = curator.find_gems("async", category: "async_networking_orchestration")

@@ -34,10 +34,7 @@ end
 When("I verify the gem against RubyGems API") do
   verifier = Rubysmithing::GemVerifier.new
   @verification_result = verifier.verify_exists?(@recommended_gem)
-  @verification_error = nil
-rescue Rubysmithing::GemVerifier::GemNotFound => e
-  @verification_result = false
-  @verification_error = e.message
+  @verification_error = "Gem not found: #{@recommended_gem}" unless @verification_result
 rescue Rubysmithing::GemVerifier::DegradedError => e
   @verification_result = false
   @verification_error = "RubyGems API unavailable: #{e.message}"
@@ -81,11 +78,11 @@ When("I run bundle install in an isolated environment") do
 end
 
 Then("the gem should exist") do
-  expect(@verification_result).to be true
+  expect(@verification_result).to be(true)
 end
 
 Then("the verification should fail") do
-  expect(@verification_result).to be false
+  expect(@verification_result).to be(false)
 end
 
 Then("I should receive an error message") do
@@ -94,7 +91,7 @@ Then("I should receive an error message") do
 end
 
 Then("the version should be available") do
-  expect(@version_result).to be true
+  expect(@version_result).to be(true)
 end
 
 Then("the latest compatible version should be returned") do
@@ -116,16 +113,16 @@ Then("no version conflicts should be detected") do
 end
 
 Then("the bundle install should succeed") do
-  expect(@bundle_result[:success]).to be true,
+  expect(@bundle_result[:success]).to be(true),
     "Bundle install failed with output: #{@bundle_result[:output]}"
 end
 
 Then("all gems should be installed correctly") do
-  expect(@bundle_result[:success]).to be true
+  expect(@bundle_result[:success]).to be(true)
 end
 
 Then("the bundle install should fail") do
-  expect(@bundle_result[:success]).to be false
+  expect(@bundle_result[:success]).to be(false)
 end
 
 Then("an appropriate error message should be returned") do

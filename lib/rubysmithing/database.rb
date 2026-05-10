@@ -6,7 +6,7 @@ require "pgvector"
 module Rubysmithing
   module Database
     def self.connect
-      db_url = ENV["DATABASE_URL"] || "postgres:///rubysmithing_rag"
+      db_url = Rubysmithing.config.fetch(:database_url)
       begin
         db = Sequel.connect(db_url)
         

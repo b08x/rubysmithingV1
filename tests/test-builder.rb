@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
-require_relative "../plugins/rubysmithing/config/boot"
+require_relative "../config/boot"
+
+# Configure RubyLLM for local Ollama
+RubyLLM.configure do |config|
+  config.ollama_api_base = ENV.fetch("OLLAMA_API_BASE", "http://tinybot:11434/v1")
+end
 
 Rubysmithing.logger.level = Logger::INFO
 puts "=== Sovereign Builder Agent Test ==="

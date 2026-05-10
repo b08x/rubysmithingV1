@@ -58,11 +58,11 @@ module Rubysmithing
       private
 
       def generate_embedding(text)
-        # Use Ollama with embeddinggemma:latest (768 dimensions)
+        # Use configured provider and model
         response = RubyLLM.embed(
           text,
-          provider: :ollama,
-          model: "embeddinggemma:latest"
+          provider: Rubysmithing.config.fetch(:blueprint_embedding_provider).to_sym,
+          model: Rubysmithing.config.fetch(:blueprint_embedding_model)
         )
         
         response.vectors

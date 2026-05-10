@@ -284,7 +284,7 @@ module Rubysmithing
         parts = constraint_string.split(",").map(&:strip)
 
         parts.each do |part|
-          requirements << parse_single(part)
+          requirements.concat(parse_single(part))
         end
 
         new(requirements)

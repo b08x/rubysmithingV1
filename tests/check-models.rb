@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../plugins/rubysmithing/config/boot"
+require_relative "../config/boot"
 require "ruby_llm"
 
 # Load models from OpenRouter
