@@ -6,8 +6,8 @@
 Given("the rubysmithing environment is initialized") do
   # Environment is implicitly initialized via autoloading
   # Verify that required classes are available
-  expect defined?(Rubysmithing::GemVerifier).to be_truthy
-  expect defined?(Rubysmithing::BundleTester).to be_truthy
+  expect(defined?(Rubysmithing::GemVerifier)).to be_truthy
+  expect(defined?(Rubysmithing::BundleTester)).to be_truthy
 end
 
 Given("the researcher recommends a gem {string}") do |gem_name|
@@ -135,5 +135,5 @@ end
 Then("the verification result should be cached") do
   # Cache verification is an internal implementation detail
   # Just verify the result was obtained successfully
-  expect(@verification_result).to be boolean
+  expect([true, false]).to include(@verification_result)
 end

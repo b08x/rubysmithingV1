@@ -5,7 +5,10 @@ docs/superpowers/
 
 node-compile-cache/
 
-**/graphify-out/*
+**/graphify-out/cache/
+
+cost.json
+manifest.json
 
 .ck/
 

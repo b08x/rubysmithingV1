@@ -6,9 +6,11 @@ World(RSpec::Matchers)
 require "ruby_llm"
 require_relative "../../config/boot"
 
-# Before each scenario, clear the blueprints table to ensure test isolation
+# Before each scenario, clear the blueprints table to ensure test isolation (if DB available)
 Before do
-  DB[:blueprints].delete
+  if DB
+    DB[:blueprints].delete
+  end
   
   # Configure RubyLLM to use Ollama for tests
   RubyLLM.configure do |config|
