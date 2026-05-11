@@ -2,25 +2,47 @@
 
 This directory contains interactive architecture diagrams that visualize the rubysmithing process flows, state machines, and component relationships.
 
+## Design System
+
+The diagrams feature a **warm cream aesthetic** with a carefully curated color palette designed for clarity and visual hierarchy:
+
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Cream | `#DEDCCB` | Primary background |
+| Ruby Red | `#971716` | Primary actions, Sovereign agent |
+| Azure | `#1B4A86` | Information, Researcher agent |
+| Forest | `#1A5C24` | Success states, Builder agent |
+| Walnut | `#59310A` | Warnings, Auditor agent |
+| Charcoal | `#111111` | Primary text, Tester agent |
+
+**Design Approach:** Modern, warm, and professional — optimized for readability in well-lit environments while maintaining strong visual distinction between components and flows.
+
 ## Available Diagrams
+
+All diagrams use a **warm cream aesthetic** (`#DEDCCB` background) with semantic color coding:
+- Ruby Red `#971716` — Sovereign agent, primary actions
+- Azure `#1B4A86` — Researcher agent, information
+- Forest `#1A5C24` — Builder agent, success states
+- Walnut `#59310A` — Auditor agent, warnings
+- Charcoal `#111111` — Tester agent, primary text
 
 ### Core Architecture
 
-1. **[Sovereign Agent Layer 1-4 Execution Model](soverign-agent-flow.html)**
+1. **[Sovereign Agent Layer 1-4 Execution Model](sovereign-agent-flow.html)** ✓
    - Visual representation of the 4-layer execution model
    - Survey (Context-Aware Detection)
    - Resolve (Epistemic Verification)
    - Dispatch (Strategic Delegation)
    - Audit (Quality Gates)
 
-2. **[Agent Orchestration - Hub-and-Spoke Pattern](agent-orchestration.html)**
+2. **[Agent Orchestration - Hub-and-Spoke Pattern](agent-orchestration.html)** ✓
    - Central Sovereign agent coordinating all operations
    - Researcher, Builder, Auditor, Tester agents as spokes
    - Communication flows and dispatch patterns
 
 ### Workflow Diagrams
 
-3. **[Workflow Commands Flow](workflow-commands-flow.html)**
+3. **[Workflow Commands Flow](workflow-commands-flow.html)** ✓
    - /flow command: Feature Implementation
    - /schema command: Data Infrastructure
    - /translate command: Foreign Codebase Translation
@@ -30,17 +52,17 @@ This directory contains interactive architecture diagrams that visualize the rub
 
 ### Component-Specific Diagrams
 
-4. **[Blueprint Discovery Flow](blueprint-discovery-flow.html)**
+4. **[Blueprint Discovery Flow](blueprint-discovery-flow.html)** ✓
    - Blueprint-First Code Generation pattern
    - Builder → BlueprintSearchTool → BlueprintLibrarian → Database
    - Mandatory blueprint search before code generation
 
-5. **[RAG Pipeline Flow](rag-pipeline-flow.html)**
+5. **[RAG Pipeline Flow](rag-pipeline-flow.html)** ✓
    - Retrieval-Augmented Generation for Ruby documentation
    - Ingester → Segmenter → Embedding → Clause Storage
    - Vector similarity search with pgvector
 
-6. **[Gem Verification Flow](gem-verification-flow.html)**
+6. **[Gem Verification Flow](gem-verification-flow.html)** ✓
    - Zero-hallucination API verification
    - Multi-layer fallback strategy
    - RubyGems.org API → Context7 MCP → ContextCache → Suggestions
@@ -48,13 +70,13 @@ This directory contains interactive architecture diagrams that visualize the rub
 ## How to Use
 
 Each diagram is a standalone HTML file with:
-- Interactive SVG graphics
-- Dark theme optimized for coding environments
+- Interactive SVG graphics with warm cream background
+- Color-coded components using the design system palette
 - Embedded code examples
 - Detailed explanations
 - Cross-references to source code
 
-Simply open any `.html` file in a web browser to view the diagram.
+Simply open any `.html` file in a web browser to view the diagram. The warm cream theme provides excellent readability in both light and dark environments.
 
 ## Source Files
 
