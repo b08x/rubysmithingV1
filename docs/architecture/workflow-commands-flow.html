@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow Commands Flow | rubysmithingV1</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-tertiary: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-emerald: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container { max-width: 1600px; margin: 0 auto; }
+
+        header {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .diagram-container {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .diagram-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .diagram-title::before {
+            content: '';
+            width: 4px;
+            height: 1.5rem;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple));
+            border-radius: 2px;
+        }
+
+        svg { display: block; max-width: 100%; height: auto; }
+
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .command-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .command-card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);
+        }
+
+        .command-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .command-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cmd-flow { background: rgba(6, 182, 212, 0.2); color: var(--accent-cyan); border: 1px solid rgba(6, 182, 212, 0.4); }
+        .cmd-schema { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.4); }
+        .cmd-translate { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); border: 1px solid rgba(245, 158, 11, 0.4); }
+        .cmd-vibe { background: rgba(139, 92, 246, 0.2); color: var(--accent-purple); border: 1px solid rgba(139, 92, 246, 0.4); }
+        .cmd-audit { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); border: 1px solid rgba(239, 68, 68, 0.4); }
+        .cmd-diagnose { background: rgba(34, 197, 94, 0.2); color: var(--accent-green); border: 1px solid rgba(34, 197, 94, 0.4); }
+
+        .command-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .command-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .step-list {
+            list-style: none;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.5rem 0;
+            border-left: 3px solid var(--border-color);
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+        }
+
+        .step-number {
+            width: 1.75rem;
+            height: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            flex-shrink: 0;
+        }
+
+        .cmd-flow .step-number { background: var(--accent-cyan); color: white; }
+        .cmd-schema .step-number { background: var(--accent-emerald); color: white; }
+        .cmd-translate .step-number { background: var(--accent-orange); color: white; }
+        .cmd-vibe .step-number { background: var(--accent-purple); color: white; }
+        .cmd-audit .step-number { background: var(--accent-red); color: white; }
+        .cmd-diagnose .step-number { background: var(--accent-green); color: white; }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .step-agent {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .agent-name {
+            color: var(--accent-cyan);
+        }
+
+        .code-block {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-comment { color: #6a737d; font-style: italic; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+        .code-symbol { color: #79c0ff; }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 4px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .comparison-table th {
+            background: var(--bg-secondary);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            h1 { font-size: 1.8rem; }
+            .command-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Workflow Commands Flow</h1>
+            <p class="subtitle">rubysmithingV1 - Command Orchestration Patterns</p>
+        </header>
+
+        <main>
+            <div class="diagram-container">
+                <h2 class="diagram-title">Command Architecture Overview</h2>
+                <svg viewBox="0 0 1200 500" width="1200" height="500">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#334155" />
+                        </marker>
+                        <linearGradient id="flowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:rgba(6,182,212,0.3)"/>
+                            <stop offset="100%" style="stop-color:rgba(139,92,246,0.15)"/>
+                        </linearGradient>
+                    </defs>
+
+                    <!-- User Input -->
+                    <g transform="translate(100, 50)">
+                        <ellipse cx="150" cy="0" rx="140" ry="40" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.5)" stroke-width="2"/>
+                        <text x="150" y="5" fill="#06b6d4" font-size="14" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">User Intent</text>
+                    </g>
+
+                    <!-- Commands Column -->
+                    <g transform="translate(320, 100)">
+                        <!-- /flow -->
+                        <g transform="translate(0, 0)">
+                            <rect x="0" y="0" width="200" height="60" rx="8" fill="rgba(6,182,212,0.2)" stroke="rgba(6,182,212,0.5)" stroke-width="2"/>
+                            <text x="100" y="22" fill="#06b6d4" font-size="14" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">/flow</text>
+                            <text x="100" y="38" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="system-ui, sans-serif">Feature Implementation</text>
+                        </g>
+
+                        <!-- /schema -->
+                        <g transform="translate(0, 80)">
+                            <rect x="0" y="0" width="200" height="60" rx="8" fill="rgba(16,185,129,0.2)" stroke="rgba(16,185,129,0.5)" stroke-width="2"/>
+                            <text x="100" y="22" fill="#10b981" font-size="14" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">/schema</text>
+                            <text x="100" y="38" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="system-ui, sans-serif">Data Infrastructure</text>
+                        </g>
+
+                        <!-- /translate -->
+                        <g transform="translate(0, 160)">
+                            <rect x="0" y="0" width="200" height="60" rx="8" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.5)" stroke-width="2"/>
+                            <text x="100" y="22" fill="#f59e0b" font-size="14" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">/translate</text>
+                            <text x="100" y="38" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="system-ui, sans-serif">Foreign Codebase</text>
+                        </g>
+
+                        <!-- /vibe -->
+                        <g transform="translate(0, 240)">
+                            <rect x="0" y="0" width="200" height="60" rx="8" fill="rgba(139,92,246,0.2)" stroke="rgba(139,92,246,0.5)" stroke-width="2"/>
+                            <text x="100" y="22" fill="#8b5cf6" font-size="14" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">/vibe</text>
+                            <text x="100" y="38" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="system-ui, sans-serif">Project Creation</text>
+                        </g>
+
+                        <!-- /audit -->
+                        <g transform="translate(0, 320)">
+                            <rect x="0" y="0" width="200" height="60" rx="8" fill="rgba(239,68,68,0.2)" stroke="rgba(239,68,68,0.5)" stroke-width="2"/>
+                            <text x="100" y="22" fill="#ef4444" font-size="14" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">/audit</text>
+                            <text x="100" y="38" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="system-ui, sans-serif">Code Review</text>
+                        </g>
+                    </g>
+
+                    <!-- Steps Column -->
+                    <g transform="translate(580, 50)">
+                        <!-- Step 1 Column -->
+                        <g transform="translate(0, 50)">
+                            <rect x="0" y="0" width="180" height="120" rx="8" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.3)" stroke-width="2"/>
+                            <text x="90" y="20" fill="#06b6d4" font-size="12" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">Step 1</text>
+                            <text x="90" y="35" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Gem Context /</text>
+                            <text x="90" y="50" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Deconstruct /</text>
+                            <text x="90" y="65" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Tree of Thoughts</text>
+                            <rect x="20" y="80" width="140" height="30" rx="4" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.4)" stroke-width="1"/>
+                            <text x="90" y="97" fill="#f59e0b" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">researcher</text>
+                        </g>
+
+                        <!-- Step 2 Column -->
+                        <g transform="translate(220, 50)">
+                            <rect x="0" y="0" width="180" height="120" rx="8" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.3)" stroke-width="2"/>
+                            <text x="90" y="20" fill="#10b981" font-size="12" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">Step 2</text>
+                            <text x="90" y="35" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Implementation /</text>
+                            <text x="90" y="50" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Design /</text>
+                            <text x="90" y="65" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">User Stories</text>
+                            <rect x="20" y="80" width="140" height="30" rx="4" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.4)" stroke-width="1"/>
+                            <text x="90" y="97" fill="#3b82f6" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">builder</text>
+                        </g>
+
+                        <!-- Step 3 Column -->
+                        <g transform="translate(440, 50)">
+                            <rect x="0" y="0" width="180" height="120" rx="8" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.3)" stroke-width="2"/>
+                            <text x="90" y="20" fill="#ef4444" font-size="12" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">Step 3</text>
+                            <text x="90" y="35" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Verification /</text>
+                            <text x="90" y="50" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Verify APIs /</text>
+                            <text x="90" y="65" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Prioritized Backlog</text>
+                            <rect x="20" y="80" width="140" height="30" rx="4" fill="rgba(239,68,68,0.2)" stroke="rgba(239,68,68,0.4)" stroke-width="1"/>
+                            <text x="90" y="97" fill="#ef4444" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">auditor</text>
+                        </g>
+
+                        <!-- Additional Steps for /vibe -->
+                        <g transform="translate(440, 190)">
+                            <rect x="0" y="0" width="180" height="60" rx="8" fill="rgba(139,92,246,0.1)" stroke="rgba(139,92,246,0.3)" stroke-width="2"/>
+                            <text x="90" y="20" fill="#8b5cf6" font-size="12" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">Step 4</text>
+                            <text x="90" y="35" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Project Scaffold</text>
+                            <rect x="20" y="40" width="140" height="25" rx="4" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.4)" stroke-width="1"/>
+                            <text x="90" y="55" fill="#3b82f6" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">builder</text>
+                        </g>
+
+                        <g transform="translate(440, 270)">
+                            <rect x="0" y="0" width="180" height="60" rx="8" fill="rgba(139,92,246,0.1)" stroke="rgba(139,92,246,0.3)" stroke-width="2"/>
+                            <text x="90" y="20" fill="#8b5cf6" font-size="12" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">Step 5</text>
+                            <text x="90" y="35" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">First Task</text>
+                            <rect x="20" y="40" width="140" height="25" rx="4" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.4)" stroke-width="1"/>
+                            <text x="90" y="55" fill="#3b82f6" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">builder</text>
+                        </g>
+                    </g>
+
+                    <!-- Output -->
+                    <g transform="translate(900, 200)">
+                        <rect x="0" y="0" width="200" height="80" rx="8" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.5)" stroke-width="2"/>
+                        <text x="100" y="22" fill="#22c55e" font-size="14" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Output</text>
+                        <text x="100" y="38" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Files + Verification</text>
+                        <text x="100" y="52" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="system-ui, sans-serif">Verdict</text>
+                    </g>
+
+                    <!-- Arrows -->
+                    <g stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,3">
+                        <!-- User to commands -->
+                        <path d="M 250 50 L 320 130"/>
+                        <path d="M 250 50 L 320 180"/>
+                        <path d="M 250 50 L 320 260"/>
+                        <path d="M 250 50 L 320 340"/>
+                        <path d="M 250 50 L 320 420"/>
+
+                        <!-- Commands to Step 1 -->
+                        <path d="M 520 130 L 580 100"/>
+                        <path d="M 520 210 L 580 100"/>
+                        <path d="M 520 290 L 580 100"/>
+                        <path d="M 520 370 L 580 100"/>
+                        <path d="M 520 450 L 580 100"/>
+
+                        <!-- Step 1 to Step 2 -->
+                        <path d="M 680 100 L 720 100"/>
+                        <path d="M 680 100 L 720 100"/>
+                        <path d="M 680 100 L 720 100"/>
+
+                        <!-- Step 2 to Step 3 -->
+                        <path d="M 840 100 L 880 100"/>
+                        <path d="M 840 100 L 880 100"/>
+                        <path d="M 840 100 L 880 100"/>
+
+                        <!-- Step 3 to Output -->
+                        <path d="M 1020 140 L 1050 200"/>
+                        <path d="M 1020 100 L 1050 200"/>
+
+                        <!-- Additional steps for vibe -->
+                        <path d="M 1020 140 L 1020 230 L 900 230" stroke-dasharray="3,3"/>
+                    </g>
+
+                    <!-- Labels -->
+                    <g transform="translate(500, 30)">
+                        <text x="0" y="0" fill="#64748b" font-size="10" text-anchor="middle" font-family="JetBrains Mono, monospace">Commands</text>
+                    </g>
+                    <g transform="translate(770, 30)">
+                        <text x="0" y="0" fill="#64748b" font-size="10" text-anchor="middle" font-family="JetBrains Mono, monospace">Workflow Steps</text>
+                    </g>
+
+                    <!-- Sovereign Label -->
+                    <g transform="translate(700, 450)">
+                        <rect x="0" y="0" width="200" height="30" rx="8" fill="rgba(139,92,246,0.1)" stroke="rgba(139,92,246,0.5)" stroke-width="1"/>
+                        <text x="100" y="20" fill="#8b5cf6" font-size="11" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">Sovereign Orchestrates</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="diagram-container">
+                <h2 class="diagram-title">Command Details</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Each command follows a consistent 3-step (or 5-step for /vibe) pattern with specialized agents handling each phase.
+                </p>
+
+                <div class="command-grid">
+                    <!-- /flow Command -->
+                    <div class="command-card">
+                        <div class="command-header">
+                            <span class="command-badge cmd-flow">/flow</span>
+                            <h3 class="command-title">Feature Implementation</h3>
+                        </div>
+                        <p class="command-desc">Implement a feature end-to-end with gem verification, implementation, and quality gate.</p>
+                        <ol class="step-list">
+                            <li class="step-item cmd-flow">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <span class="step-title">Gem Context Verification</span>
+                                    <span class="step-agent"><span class="agent-name">researcher</span> verifies gem APIs via Context7</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-flow">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <span class="step-title">Feature Implementation</span>
+                                    <span class="step-agent"><span class="agent-name">builder</span> generates code with blueprint-first approach</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-flow">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <span class="step-title">Implementation Verification</span>
+                                    <span class="step-agent"><span class="agent-name">auditor</span> runs SIFT protocol quality assessment</span>
+                                </div>
+                            </li>
+                        </ol>
+                        <div class="code-block">
+<span class="code-comment"># Example usage:</span><br>
+<span class="code-symbol">/flow</span> <span class="code-string">"Implement user authentication with JWT"</span>
+                        </div>
+                    </div>
+
+                    <!-- /schema Command -->
+                    <div class="command-card">
+                        <div class="command-header">
+                            <span class="command-badge cmd-schema">/schema</span>
+                            <h3 class="command-title">Data Infrastructure</h3>
+                        </div>
+                        <p class="command-desc">Design and implement AI data infrastructure: PostgreSQL/pgvector, chunking pipelines, embedding strategies.</p>
+                        <ol class="step-list">
+                            <li class="step-item cmd-schema">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <span class="step-title">Gem Context Verification</span>
+                                    <span class="step-agent"><span class="agent-name">researcher</span> verifies gem APIs for data infrastructure</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-schema">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <span class="step-title">Schema Design & Implementation</span>
+                                    <span class="step-agent"><span class="agent-name">builder</span> designs migrations, models, pipeline files</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-schema">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <span class="step-title">Verification</span>
+                                    <span class="step-agent"><span class="agent-name">auditor</span> validates design and implementation</span>
+                                </div>
+                            </li>
+                        </ol>
+                        <div class="code-block">
+<span class="code-comment"># Example usage:</span><br>
+<span class="code-symbol">/schema</span> <span class="code-string">"PostgreSQL schema with pgvector for RAG system"</span>
+                        </div>
+                    </div>
+
+                    <!-- /translate Command -->
+                    <div class="command-card">
+                        <div class="command-header">
+                            <span class="command-badge cmd-translate">/translate</span>
+                            <h3 class="command-title">Foreign Codebase</h3>
+                        </div>
+                        <p class="command-desc">Translate code from other languages to idiomatic Ruby with verified API calls.</p>
+                        <ol class="step-list">
+                            <li class="step-item cmd-translate">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <span class="step-title">Deconstruct Foreign Codebase</span>
+                                    <span class="step-agent"><span class="agent-name">researcher</span> analyzes source code structure and dependencies</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-translate">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <span class="step-title">Verify Gem APIs</span>
+                                    <span class="step-agent"><span class="agent-name">researcher</span> ensures Ruby equivalents exist and are compatible</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-translate">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <span class="step-title">Ruby Implementation</span>
+                                    <span class="step-agent"><span class="agent-name">builder</span> generates idiomatic Ruby translation</span>
+                                </div>
+                            </li>
+                        </ol>
+                        <div class="code-block">
+<span class="code-comment"># Example usage:</span><br>
+<span class="code-symbol">/translate</span> <span class="code-string">"Convert this Python FastAPI endpoint to Ruby Sinatra"</span>
+                        </div>
+                    </div>
+
+                    <!-- /vibe Command -->
+                    <div class="command-card">
+                        <div class="command-header">
+                            <span class="command-badge cmd-vibe">/vibe</span>
+                            <h3 class="command-title">Project Creation</h3>
+                        </div>
+                        <p class="command-desc">Full project creation workflow from requirements gathering to first task implementation.</p>
+                        <ol class="step-list">
+                            <li class="step-item cmd-vibe">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <span class="step-title">Tree of Thoughts Exploration</span>
+                                    <span class="step-agent"><span class="agent-name">researcher</span> explores problem space comprehensively</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-vibe">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <span class="step-title">User Stories</span>
+                                    <span class="step-agent"><span class="agent-name">researcher</span> defines user requirements and acceptance criteria</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-vibe">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <span class="step-title">Prioritized Backlog</span>
+                                    <span class="step-agent"><span class="agent-name">builder</span> creates structured backlog with priorities</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-vibe">
+                                <span class="step-number">4</span>
+                                <div class="step-content">
+                                    <span class="step-title">Project Scaffold</span>
+                                    <span class="step-agent"><span class="agent-name">builder</span> generates project structure and initial files</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-vibe">
+                                <span class="step-number">5</span>
+                                <div class="step-content">
+                                    <span class="step-title">First Task Implementation</span>
+                                    <span class="step-agent"><span class="agent-name">builder</span> implements highest priority task</span>
+                                </div>
+                            </li>
+                        </ol>
+                        <div class="code-block">
+<span class="code-comment"># Example usage:</span><br>
+<span class="code-symbol">/vibe</span> <span class="code-string">"Create a Rails-based e-commerce platform with Stripe integration"</span>
+                        </div>
+                    </div>
+
+                    <!-- /audit Command -->
+                    <div class="command-card">
+                        <div class="command-header">
+                            <span class="command-badge cmd-audit">/audit</span>
+                            <h3 class="command-title">Code Review</h3>
+                        </div>
+                        <p class="command-desc">Comprehensive SIFT Protocol audit with 8-section assessment and actionable recommendations.</p>
+                        <ol class="step-list">
+                            <li class="step-item cmd-audit">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <span class="step-title">SIFT Assessment</span>
+                                    <span class="step-agent"><span class="agent-name">auditor</span> performs comprehensive code analysis</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-audit">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <span class="step-title">Evaluation Rubric</span>
+                                    <span class="step-agent"><span class="agent-name">auditor</span> applies standardized quality metrics</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-audit">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <span class="step-title">Rubric Evaluation</span>
+                                    <span class="step-agent"><span class="agent-name">auditor</span> generates final report with scores and recommendations</span>
+                                </div>
+                            </li>
+                        </ol>
+                        <div class="code-block">
+<span class="code-comment"># Example usage:</span><br>
+<span class="code-symbol">/audit</span> <span class="code-string">"Review the User model for Rails conventions and security issues"</span>
+                        </div>
+                    </div>
+
+                    <!-- /diagnose Command -->
+                    <div class="command-card">
+                        <div class="command-header">
+                            <span class="command-badge cmd-diagnose">/diagnose</span>
+                            <h3 class="command-title">Root Cause Analysis</h3>
+                        </div>
+                        <p class="command-desc">Identify and resolve issues through systematic root cause analysis and targeted refactoring.</p>
+                        <ol class="step-list">
+                            <li class="step-item cmd-diagnose">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <span class="step-title">Root Cause Analysis</span>
+                                    <span class="step-agent"><span class="agent-name">researcher</span> traces issue to source using Five Whys</span>
+                                </div>
+                            </li>
+                            <li class="step-item cmd-diagnose">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <span class="step-title">Targeted Refactor</span>
+                                    <span class="step-agent"><span class="agent-name">builder</span> applies minimal, focused changes</span>
+                                </div>
+                            </li>
+                        </ol>
+                        <div class="code-block">
+<span class="code-comment"># Example usage:</span><br>
+<span class="code-symbol">/diagnose</span> <span class="code-string">"Why is the UserRegistrationService timing out under load?"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <h2 class="diagram-title">Workflow Pattern Comparison</h2>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Steps</th>
+                            <th>Primary Agent</th>
+                            <th>Output</th>
+                            <th>Use Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>/flow</code></td>
+                            <td>3</td>
+                            <td>researcher → builder → auditor</td>
+                            <td>Implementation + Verification</td>
+                            <td>Feature development</td>
+                        </tr>
+                        <tr>
+                            <td><code>/schema</code></td>
+                            <td>3</td>
+                            <td>researcher → builder → auditor</td>
+                            <td>Schema + Pipeline + Verdict</td>
+                            <td>Data infrastructure</td>
+                        </tr>
+                        <tr>
+                            <td><code>/translate</code></td>
+                            <td>3</td>
+                            <td>researcher → researcher → builder</td>
+                            <td>Ruby translation + Verification</td>
+                            <td>Language migration</td>
+                        </tr>
+                        <tr>
+                            <td><code>/vibe</code></td>
+                            <td>5</td>
+                            <td>researcher → researcher → builder → builder → builder</td>
+                            <td>Full project scaffold + First task</td>
+                            <td>New project creation</td>
+                        </tr>
+                        <tr>
+                            <td><code>/audit</code></td>
+                            <td>3</td>
+                            <td>auditor → auditor → auditor</td>
+                            <td>SIFT report with scores</td>
+                            <td>Code quality assessment</td>
+                        </tr>
+                        <tr>
+                            <td><code>/diagnose</code></td>
+                            <td>2</td>
+                            <td>researcher → builder</td>
+                            <td>Root cause + Fix</td>
+                            <td>Issue resolution</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--accent-cyan);"></div>
+                    <span><strong>/flow</strong> Feature Implementation</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--accent-emerald);"></div>
+                    <span><strong>/schema</strong> Data Infrastructure</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--accent-orange);"></div>
+                    <span><strong>/translate</strong> Foreign Codebase Translation</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--accent-purple);"></div>
+                    <span><strong>/vibe</strong> Project Creation</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--accent-red);"></div>
+                    <span><strong>/audit</strong> Code Review</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--accent-green);"></div>
+                    <span><strong>/diagnose</strong> Issue Resolution</span>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>rubysmithingV1 Architecture Documentation | Workflow Commands Flow | Based on commands/*.md</p>
+        </footer>
+    </div>
+</body>
+</html>

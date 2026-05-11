@@ -76,3 +76,18 @@ graphify-out/
 .ck/
 
 Gemfile.lock
+.claude
+.crush
+.gemini
+.ruby-lsp
+logs
+spec
+tests
+tasks/document
+.graphifyignore
+.rubocop.yml
+skills/CLAUDE.md
+AGENTS.md
+.env.example
+.ruby-version
+backlog.md

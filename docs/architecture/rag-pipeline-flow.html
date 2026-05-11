@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Pipeline Flow | rubysmithingV1</title>
+    <style>
+        :root {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-tertiary: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-green: #22c55e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; padding: 2rem; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        header { margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border-color); }
+        h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--text-secondary); font-size: 1.1rem; }
+        .diagram-container { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; overflow-x: auto; }
+        .diagram-title { font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+        .diagram-title::before { content: ''; width: 4px; height: 1.5rem; background: linear-gradient(180deg, var(--accent-cyan), var(--accent-purple)); border-radius: 2px; }
+        svg { display: block; max-width: 100%; height: auto; }
+        .code-block { background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; overflow-x: auto; margin: 1rem 0; }
+        .code-comment { color: #6a737d; font-style: italic; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+        .code-symbol { color: #79c0ff; }
+        footer { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.85rem; }
+        .section { margin-bottom: 2rem; }
+        .section-title { font-size: 1.4rem; margin: 1.5rem 0 1rem; color: var(--text-primary); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RAG Pipeline Flow</h1>
+            <p class="subtitle">rubysmithingV1 - Retrieval-Augmented Generation for Ruby Documentation</p>
+        </header>
+
+        <main>
+            <div class="diagram-container">
+                <h2 class="diagram-title">RAG Architecture Overview</h2>
+                <svg viewBox="0 0 1000 600" width="1000" height="600">
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#334155" />
+                        </marker>
+                    </defs>
+
+                    <!-- Input -->
+                    <g transform="translate(100, 50)">
+                        <ellipse cx="80" cy="0" rx="70" ry="30" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.5)" stroke-width="2"/>
+                        <text x="80" y="5" fill="#06b6d4" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Document</text>
+                        <text x="80" y="20" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace">title, text, metadata</text>
+                    </g>
+
+                    <!-- Ingester -->
+                    <g transform="translate(100, 120)">
+                        <rect x="0" y="0" width="160" height="60" rx="8" fill="rgba(16,185,129,0.2)" stroke="rgba(16,185,129,0.5)" stroke-width="2"/>
+                        <text x="80" y="22" fill="#10b981" font-size="13" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Ingester</text>
+                        <text x="80" y="38" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace">Ingests & Segments</text>
+                    </g>
+
+                    <!-- Pragmatic Segmenter -->
+                    <g transform="translate(320, 120)">
+                        <rect x="0" y="0" width="160" height="60" rx="8" fill="rgba(139,92,246,0.2)" stroke="rgba(139,92,246,0.5)" stroke-width="2"/>
+                        <text x="80" y="22" fill="#8b5cf6" font-size="12" font-weight="600" text-anchor="middle" font-family="JetBrains Mono, monospace">Segmenter</text>
+                        <text x="80" y="38" fill="#94a3b8" font-size="8" text-anchor="middle" font-family="system-ui, sans-serif">PragmaticSegmenter</text>
+                    </g>
+
+                    <!-- Segments -->
+                    <g transform="translate(540, 120)">
+                        <rect x="0" y="0" width="160" height="60" rx="8" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.4)" stroke-width="1.5"/>
+                        <text x="80" y="22" fill="#06b6d4" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Segments</text>
+                        <text x="80" y="38" fill="#94a3b8" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">Semantic chunks</text>
+                    </g>
+
+                    <!-- Embedding Generation -->
+                    <g transform="translate(760, 120)">
+                        <rect x="0" y="0" width="160" height="60" rx="8" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.5)" stroke-width="2"/>
+                        <text x="80" y="22" fill="#f59e0b" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Embedding</text>
+                        <text x="80" y="38" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace">RubyLLM.embed</text>
+                    </g>
+
+                    <!-- Clause Storage -->
+                    <g transform="translate(540, 220)">
+                        <g transform="translate(0, 0)">
+                            <path d="M 0 0 L 0 60 L 50 60 L 75 45 L 75 15 L 50 0 Z" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.5)" stroke-width="2"/>
+                            <path d="M 75 0 L 100 0 L 100 60 L 75 60" fill="rgba(34,197,94,0.05)" stroke="rgba(34,197,94,0.3)" stroke-width="1"/>
+                            <text x="50" y="35" fill="#22c55e" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Clause</text>
+                            <text x="50" y="50" fill="#94a3b8" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">vector store</text>
+                        </g>
+                    </g>
+
+                    <!-- Document Storage -->
+                    <g transform="translate(100, 220)">
+                        <g transform="translate(0, 0)">
+                            <path d="M 0 0 L 0 60 L 50 60 L 75 45 L 75 15 L 50 0 Z" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.5)" stroke-width="2"/>
+                            <path d="M 75 0 L 100 0 L 100 60 L 75 60" fill="rgba(6,182,212,0.05)" stroke="rgba(6,182,212,0.3)" stroke-width="1"/>
+                            <text x="50" y="35" fill="#06b6d4" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Document</text>
+                            <text x="50" y="50" fill="#94a3b8" font-size="8" text-anchor="middle" font-family="JetBrains Mono, monospace">metadata</text>
+                        </g>
+                    </g>
+
+                    <!-- Retriever -->
+                    <g transform="translate(760, 220)">
+                        <rect x="0" y="0" width="160" height="60" rx="8" fill="rgba(16,185,129,0.2)" stroke="rgba(16,185,129,0.5)" stroke-width="2"/>
+                        <text x="80" y="22" fill="#10b981" font-size="13" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Retriever</text>
+                        <text x="80" y="38" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace">Searches & Retrieves</text>
+                    </g>
+
+                    <!-- Query Input -->
+                    <g transform="translate(760, 50)">
+                        <ellipse cx="80" cy="0" rx="70" ry="30" fill="rgba(16,185,129,0.05)" stroke="rgba(16,185,129,0.4)" stroke-width="2"/>
+                        <text x="80" y="5" fill="#10b981" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Query</text>
+                        <text x="80" y="20" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace">Natural language</text>
+                    </g>
+
+                    <!-- Retrieved Clauses Output -->
+                    <g transform="translate(760, 320)">
+                        <ellipse cx="80" cy="0" rx="70" ry="30" fill="rgba(34,197,94,0.05)" stroke="rgba(34,197,94,0.4)" stroke-width="2"/>
+                        <text x="80" y="5" fill="#22c55e" font-size="12" font-weight="600" text-anchor="middle" font-family="system-ui, sans-serif">Retrieved</text>
+                        <text x="80" y="20" fill="#94a3b8" font-size="9" text-anchor="middle" font-family="JetBrains Mono, monospace">Top-k clauses</text>
+                    </g>
+
+                    <!-- Arrows -->
+                    <g stroke="#475569" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,3">
+                        <path d="M 170 80 L 170 120"/>
+                        <path d="M 260 150 L 320 150"/>
+                        <path d="M 480 150 L 540 150"/>
+                        <path d="M 720 150 L 760 150"/>
+                        <path d="M 840 150 L 840 190 L 760 190"/>
+                        <path d="M 580 220 L 680 220"/>
+                        <path d="M 840 250 L 840 290"/>
+                        <path d="M 840 320 L 840 350"/>
+                        <path d="M 150 250 L 150 290"/>
+                        <path d="M 840 80 L 840 110"/>
+                    </g>
+
+                    <!-- Embedding Arrow -->
+                    <g stroke="#f59e0b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="3,2">
+                        <path d="M 170 150 L 290 150 L 290 170 L 720 170 L 720 150"/>
+                        <text x="500" y="165" fill="#f59e0b" font-size="10" font-family="JetBrains Mono, monospace">generate embeddings</text>
+                    </g>
+
+                    <!-- Store Arrow -->
+                    <g stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="3,2">
+                        <path d="M 840 170 L 840 210 L 580 210"/>
+                        <text x="710" y="190" fill="#22c55e" font-size="10" font-family="JetBrains Mono, monospace">store in DB</text>
+                    </g>
+
+                    <!-- Retrieve Arrow -->
+                    <g stroke="#10b981" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="3,2">
+                        <path d="M 840 250 L 640 250 L 640 230"/>
+                        <text x="740" y="245" fill="#10b981" font-size="10" font-family="JetBrains Mono, monospace">vector search</text>
+                    </g>
+                </svg>
+            </div>
+
+            <div class="section">
+                <h2 class="section-title">Pipeline Steps</h2>
+                <ol>
+                    <li><strong>Ingestion:</strong> <code>Ingester.ingest(title:, text:, metadata:)</code> receives document and creates a Document record</li>
+                    <li><strong>Segmentation:</strong> PragmaticSegmenter splits text into semantic chunks optimized for embedding</li>
+                    <li><strong>Embedding:</strong> Each segment is embedded using RubyLLM.embed() with configured provider/model</li>
+                    <li><strong>Storage:</strong> Each Clause record stores content + embedding vector in PostgreSQL with pgvector</li>
+                    <li><strong>Retrieval:</strong> Retriever queries using vector similarity search (cosine distance via pgvector <=> operator)</li>
+                </ol>
+            </div>
+
+            <div class="diagram-container">
+                <h2 class="diagram-title">Ingester Implementation</h2>
+                <div class="code-block">
+<span class="code-comment"># lib/rubysmithing/rag/ingester.rb</span><br>
+<span class="code-keyword">class</span> <span class="code-function">Ingester</span><br>
+&nbsp;&nbsp;<span class="code-keyword">def</span> <span class="code-function">ingest</span>(title:, text:, metadata: {})<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document = <span class="code-symbol">Document.</span><span class="code-function">create</span>(title: title, metadata: metadata.to_json)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;segments = <span class="code-symbol">PragmaticSegmenter::Segmenter.</span><span class="code-function">new</span>(text: text).segment<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@db.transaction <span class="code-keyword">do</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;segments.each <span class="code-keyword">do</span> |segment|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;embedding = <span class="code-function">generate_embedding</span>(segment)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-symbol">Clause.</span><span class="code-function">create</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;document_id: document.id,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;content: segment,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;embedding: embedding<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">end</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">end</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;document<br>
+&nbsp;&nbsp;<span class="code-keyword">end</span><br>
+<span class="code-keyword">end</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <h2 class="diagram-title">Retriever Implementation</h2>
+                <div class="code-block">
+<span class="code-comment"># lib/rubysmithing/rag/retriever.rb</span><br>
+<span class="code-keyword">class</span> <span class="code-function">Retriever</span><br>
+&nbsp;&nbsp;<span class="code-keyword">def</span> <span class="code-function">search</span>(query, limit: 5)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;query_embedding = <span class="code-function">generate_embedding</span>(query)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clauses = db[:clauses]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.join(:documents, id: :document_id)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.select(:id, :content, :document_id, :title, :metadata)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.select_append { (Sequel.lit("1 - (embedding &lt;=&gt; ?)", "[#{query_embedding.join(',')}]")).as(:similarity) }<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.order(Sequel.lit("embedding &lt;=&gt; ?", "[#{query_embedding.join(',')}]"))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.limit(limit)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.all<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;clauses.map <span class="code-keyword">do</span> |row|<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id: row[:id],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;content: row[:content],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;similarity: row[:similarity],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;source: row[:title],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;metadata: JSON.parse(row[:metadata])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">end</span><br>
+&nbsp;&nbsp;<span class="code-keyword">end</span><br>
+<span class="code-keyword">end</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <h2 class="diagram-title">Database Schema</h2>
+                <div class="code-block">
+<span class="code-comment"># Documents table - stores original content with metadata</span><br>
+CREATE TABLE documents (<br>
+&nbsp;&nbsp;id SERIAL PRIMARY KEY,<br>
+&nbsp;&nbsp;title TEXT NOT NULL,<br>
+&nbsp;&nbsp;metadata JSONB,<br>
+&nbsp;&nbsp;created_at TIMESTAMP DEFAULT NOW()<br>
+);<br>
+<br>
+<span class="code-comment"># Clauses table - stores segmented chunks with embeddings</span><br>
+CREATE TABLE clauses (<br>
+&nbsp;&nbsp;id SERIAL PRIMARY KEY,<br>
+&nbsp;&nbsp;document_id INTEGER NOT NULL REFERENCES documents(id),<br>
+&nbsp;&nbsp;content TEXT NOT NULL,<br>
+&nbsp;&nbsp;embedding vector(384) NOT NULL,  <span class="code-comment">-- pgvector for semantic search</span><br>
+&nbsp;&nbsp;created_at TIMESTAMP DEFAULT NOW()<br>
+);<br>
+<br>
+<span class="code-comment"># Indexes for fast similarity search</span><br>
+CREATE INDEX idx_clauses_embedding ON clauses USING ivfflat (embedding vector_l2_ops) WITH (lists = 100);
+CREATE INDEX idx_clauses_document_id ON clauses(document_id);
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>rubysmithingV1 Architecture Documentation | RAG Pipeline Flow | Semantic Search for Ruby Documentation</p>
+        </footer>
+    </div>
+</body>
+</html>
