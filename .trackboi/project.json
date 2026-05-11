@@ -1,0 +1,23 @@
+{
+	"version": 1,
+	"name": "rubysmithingV1",
+	"people": [
+		{
+			"id": "person_01KRBHC33EM63ZHFQSRMAE864Z",
+			"displayName": "Robert Pannick",
+			"gitEmails": [
+				"rwpannick@gmail.com"
+			],
+			"gitNames": [
+				"Robert Pannick"
+			]
+		}
+	],
+	"agents": [
+		{
+			"id": "agent_01KRBGG5HJT418GCKQJGAESFSQ",
+			"name": "Steve",
+			"description": "Default coding identity"
+		}
+	]
+}
