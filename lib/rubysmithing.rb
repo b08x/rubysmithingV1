@@ -2,6 +2,7 @@
 
 require "journald/logger"
 require "logger"
+require "socket"
 require "tty-config"
 require "zeitwerk"
 
@@ -56,13 +57,53 @@ module Rubysmithing
       @logger ||= begin
         level_str = config.fetch(:log_level).upcase
         level = Logger.const_get(level_str) rescue Logger::INFO
-        
-        # Initialize Journald Logger with the program name
+
+        # Initialize Journald Logger with enhanced structured fields
         l = Journald::Logger.new("rubysmithing")
         l.level = level
-        l.tag(app: "rubysmithing")
+
+        # Base tags for all log entries
+        l.tag(
+          app: "rubysmithing",
+          version: Rubysmithing::VERSION rescue "unknown",
+          environment: ENV.fetch("RAILS_ENV", "development"),
+          hostname: Socket.gethostname
+        )
         l
       end
+    end
+
+    # Enhanced logging for agent coordination with structured fields
+    def log_agent_event(level, message, **fields)
+      # Merge agent context with user fields
+      structured_fields = {
+        timestamp: Time.current.iso8601,
+        thread_id: Thread.current.object_id,
+        process_id: Process.pid
+      }.merge(fields)
+
+      logger.public_send(level, message, structured_fields)
+    end
+
+    # Generate correlation ID for tracking agent handoffs
+    def new_correlation_id
+      @correlation_counter ||= 0
+      @correlation_counter += 1
+      "#{Process.pid}-#{Thread.current.object_id}-#{@correlation_counter}-#{Time.current.to_f}"
+    end
+
+    # Set correlation ID for current thread context
+    def with_correlation_id(correlation_id = nil)
+      correlation_id ||= new_correlation_id
+      Thread.current[:correlation_id] = correlation_id
+      yield correlation_id
+    ensure
+      Thread.current[:correlation_id] = nil
+    end
+
+    # Get current correlation ID from thread context
+    def current_correlation_id
+      Thread.current[:correlation_id]
     end
 
     def logger=(custom_logger)
