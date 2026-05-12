@@ -108,9 +108,21 @@ agent.yaml
 .shellcheckrc
 .codemap/
 
-repomix-outputs/
-.repomixignore
-repomix.config.json
-Gemfile.lock
+.claude
+.crush
+.gemini
+.ruby-lsp
+logs
+spec
+tests
+tasks/document
+.graphifyignore
 .rubocop.yml
+skills/CLAUDE.md
+AGENTS.md
+.ckignore
 .env.example
+.gitignore
+.ruby-version
+backlog.md
+Gemfile.lock

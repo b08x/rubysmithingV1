@@ -26,14 +26,41 @@ module Rubysmithing
         c.set(:log_level, value: ENV.fetch("LOG_LEVEL", "INFO"))
         c.set(:ollama_api_base, value: ENV.fetch("OLLAMA_API_BASE", "http://localhost:11434/v1"))
         
-        # LLM Defaults
-        c.set(:blueprint_embedding_provider, value: :ollama)
-        c.set(:blueprint_embedding_model, value: "embeddinggemma:latest")
-        
-        c.set(:rag_embedding_provider, value: :openrouter)
-        c.set(:rag_embedding_model, value: "mistralai/mistral-embed")
-        
-        c.set(:builder_model, value: "google/gemini-2.0-flash-lite-001")
+        # Multi-Provider LLM Configuration with SFL Filtering
+        # Mistral Direct Provider
+        c.set(:mistral_api_base, value: ENV.fetch("MISTRAL_API_BASE", "https://api.mistral.ai/v1"))
+        c.set(:mistral_api_key, value: ENV.fetch("MISTRAL_API_KEY", ""))
+
+        # OpenRouter Provider for Open Source Models
+        c.set(:openrouter_api_base, value: ENV.fetch("OPENROUTER_API_BASE", "https://openrouter.ai/api/v1"))
+        c.set(:openrouter_api_key, value: ENV.fetch("OPENROUTER_API_KEY", ""))
+
+        # Hugging Face Inference
+        c.set(:hf_inference_api_base, value: ENV.fetch("HF_API_BASE", "https://api-inference.huggingface.co"))
+        c.set(:hf_api_key, value: ENV.fetch("HF_API_KEY", ""))
+
+        # Model Assignments by Use Case
+        c.set(:embedding_provider, value: :openrouter)
+        c.set(:embedding_model, value: "mistralai/mistral-embed")
+
+        c.set(:reasoning_provider, value: :mistral)
+        c.set(:reasoning_model, value: "mistral-medium-3.5")
+
+        c.set(:coding_provider, value: :mistral)
+        c.set(:coding_model, value: "codestral")
+
+        c.set(:lightweight_provider, value: :mistral)
+        c.set(:lightweight_model, value: "mistral-nemo")
+
+        c.set(:experimental_provider, value: :openrouter)
+        c.set(:experimental_model, value: "qwen/qwen-2.5-72b-instruct")
+
+        # SFL Processing Configuration
+        c.set(:sfl_analysis_provider, value: :mistral)
+        c.set(:sfl_analysis_model, value: "mistral-small")
+
+        c.set(:sfl_filter_enabled, value: true)
+        c.set(:sfl_consistency_threshold, value: 0.85)
         
         # Read from file if it exists
         begin
@@ -122,11 +149,11 @@ module Rubysmithing
       # Ensure directories
       ensure_directories!
 
-      # Configure LLMs
-      configure_llm!
-
       # Setup Autoloading
       loader
+
+      # Configure Multi-Provider LLMs with DSPy RubyLLM adapter
+      configure_llm_providers!
 
       # Run migrations if applicable
       Rubysmithing::Database.migrate(db) if db
@@ -138,10 +165,16 @@ module Rubysmithing
 
     private
 
-    def configure_llm!
-      RubyLLM.configure do |c|
-        c.ollama_api_base = config.fetch(:ollama_api_base)
-      end
+    def configure_llm_providers!
+      # Load and configure multi-provider LLM setup
+      require_relative "rubysmithing/llm_providers"
+      Rubysmithing::LlmProviders.configure!
+
+      log_agent_event(:info, "Multi-provider LLM configuration complete",
+                     mistral_configured: !config.fetch(:mistral_api_key, "").empty?,
+                     openrouter_configured: !config.fetch(:openrouter_api_key, "").empty?,
+                     hf_configured: !config.fetch(:hf_api_key, "").empty?,
+                     sfl_filter_enabled: config.fetch(:sfl_filter_enabled))
     end
 
     def ensure_directories!

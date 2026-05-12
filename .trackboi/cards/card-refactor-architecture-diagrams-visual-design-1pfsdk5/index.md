@@ -5,13 +5,13 @@ title: "refactor architecture diagrams visual design"
 parentId: null
 scope: {"kind":"project","ref":"global"}
 trackId: null
-column: "todo"
+column: "done"
 rank: "j"
 labels: []
 assignee: null
 fieldValues: {}
 createdAt: "2026-05-11T13:31:23.768Z"
-updatedAt: "2026-05-11T13:32:29.689Z"
+updatedAt: "2026-05-12T22:32:01.145Z"
 createdBy: "agent_01KRBGG5HJT418GCKQJGAESFSQ"
 updatedBy: "agent_01KRBGG5HJT418GCKQJGAESFSQ"
 ---

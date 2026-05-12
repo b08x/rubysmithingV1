@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Flow & State Management - Rubysmithing</title>
+    <style>
+        :root {
+            --primary: #971716;
+            --background: #DEDCCB;
+            --info: #1B4A86;
+            --success: #1A5C24;
+            --utility: #59310A;
+            --text: #111111;
+            --cache-color: #E91E63;
+            --storage-color: #2E7D32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), #B32A2A);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .nav-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .flow-container {
+            max-width: 1800px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .flow-diagram {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 3rem;
+            min-height: 80vh;
+            align-items: start;
+        }
+
+        .pipeline-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .stage-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 24px rgba(17, 17, 17, 0.1);
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stage-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 48px rgba(17, 17, 17, 0.15);
+        }
+
+        .stage-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stage1 { border-color: var(--info); }
+        .stage1::before { background: linear-gradient(90deg, var(--info), #2557A3); }
+
+        .stage2 { border-color: var(--primary); }
+        .stage2::before { background: linear-gradient(90deg, var(--primary), #B32A2A); }
+
+        .stage3 { border-color: var(--success); }
+        .stage3::before { background: linear-gradient(90deg, var(--success), #228B32); }
+
+        .stage4 { border-color: var(--utility); }
+        .stage4::before { background: linear-gradient(90deg, var(--utility), #7A4A15); }
+
+        .stage-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stage-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .stage1 .stage-number { background: linear-gradient(135deg, var(--info), #2557A3); }
+        .stage2 .stage-number { background: linear-gradient(135deg, var(--primary), #B32A2A); }
+        .stage3 .stage-number { background: linear-gradient(135deg, var(--success), #228B32); }
+        .stage4 .stage-number { background: linear-gradient(135deg, var(--utility), #7A4A15); }
+
+        .stage-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .stage-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .cache-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 12px 36px rgba(17, 17, 17, 0.1);
+            border-left: 6px solid var(--cache-color);
+            height: fit-content;
+        }
+
+        .storage-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 12px 36px rgba(17, 17, 17, 0.1);
+            border-left: 6px solid var(--storage-color);
+            height: fit-content;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cache-title { color: var(--cache-color); }
+        .storage-title { color: var(--storage-color); }
+
+        .component-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .component-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .cache-card {
+            border-left: 3px solid var(--cache-color);
+        }
+
+        .storage-card {
+            border-left: 3px solid var(--storage-color);
+        }
+
+        .component-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+
+        .component-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .component-desc {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .flow-arrows {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .arrow {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 2px;
+            animation: pulse 2s infinite;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            border-left: 8px solid var(--primary);
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+
+        .horizontal-arrow {
+            height: 3px;
+            width: 80px;
+        }
+
+        .horizontal-arrow::after {
+            right: -8px;
+            top: -2px;
+        }
+
+        .diagonal-arrow {
+            height: 2px;
+            width: 60px;
+        }
+
+        .diagonal-arrow::after {
+            right: -6px;
+            top: -3px;
+        }
+
+        /* Specific arrow positioning */
+        .arrow-1 {
+            top: 15%;
+            left: 27%;
+        }
+
+        .arrow-2 {
+            top: 35%;
+            left: 27%;
+        }
+
+        .arrow-3 {
+            top: 55%;
+            left: 27%;
+        }
+
+        .arrow-4 {
+            top: 75%;
+            left: 27%;
+        }
+
+        .arrow-cache-1 {
+            top: 25%;
+            right: 27%;
+            transform: rotate(45deg);
+        }
+
+        .arrow-cache-2 {
+            top: 45%;
+            right: 27%;
+            transform: rotate(30deg);
+        }
+
+        .arrow-cache-3 {
+            top: 65%;
+            right: 27%;
+            transform: rotate(15deg);
+        }
+
+        .arrow-storage-1 {
+            top: 80%;
+            right: 35%;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .session-flow {
+            background: linear-gradient(135deg, var(--info), #2557A3);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .session-flow::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 15px,
+                rgba(255, 255, 255, 0.03) 15px,
+                rgba(255, 255, 255, 0.03) 30px
+            );
+            animation: drift 20s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .session-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .session-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .session-step {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: bold;
+        }
+
+        .archival-process {
+            background: linear-gradient(135deg, var(--storage-color), #388E3C);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .archival-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .archival-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .performance-metrics {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(17, 17, 17, 0.1);
+            border-left: 6px solid var(--utility);
+            margin: 2rem 0;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            border-left: 3px solid var(--utility);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--utility);
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        @media (max-width: 1400px) {
+            .flow-diagram {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .arrow {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .session-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="nav-button">← Back to Overview</a>
+
+    <header class="header">
+        <h1>Data Flow & State Management</h1>
+        <p>Comprehensive data transformation through Redis cache layers to PostgreSQL storage</p>
+    </header>
+
+    <div class="flow-container">
+        <div class="flow-diagram">
+
+            <!-- Pipeline Section -->
+            <div class="pipeline-section">
+                <div class="stage-card stage1">
+                    <div class="stage-header">
+                        <div class="stage-number">1</div>
+                        <div>
+                            <div class="stage-title">Semantic Segmentation</div>
+                            <div class="stage-desc">Document → coherent chunks</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stage-card stage2">
+                    <div class="stage-header">
+                        <div class="stage-number">2</div>
+                        <div>
+                            <div class="stage-title">Token Cleaning</div>
+                            <div class="stage-desc">Chunks → normalized tokens</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stage-card stage3">
+                    <div class="stage-header">
+                        <div class="stage-number">3</div>
+                        <div>
+                            <div class="stage-title">Linguistic Tagging</div>
+                            <div class="stage-desc">Tokens → annotated features</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stage-card stage4">
+                    <div class="stage-header">
+                        <div class="stage-number">4</div>
+                        <div>
+                            <div class="stage-title">Embedding Generation</div>
+                            <div class="stage-desc">Features → vector representations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cache Section -->
+            <div class="cache-section">
+                <div class="section-title cache-title">
+                    🚀 Redis Cache Layer
+                </div>
+
+                <div class="component-grid">
+                    <div class="component-card cache-card">
+                        <div class="component-title">Processing Session</div>
+                        <div class="component-desc">Tracks pipeline progress, stage completion, and intermediate results with correlation IDs</div>
+                    </div>
+
+                    <div class="component-card cache-card">
+                        <div class="component-title">Token Cache</div>
+                        <div class="component-desc">Stores cleaned tokens, morphological analysis, and lemmatization mappings temporarily</div>
+                    </div>
+
+                    <div class="component-card cache-card">
+                        <div class="component-title">Embedding Cache</div>
+                        <div class="component-desc">Caches 768-dimensional vectors with model version tracking for reuse optimization</div>
+                    </div>
+
+                    <div class="component-card cache-card">
+                        <div class="component-title">SFL Analysis Cache</div>
+                        <div class="component-desc">Stores SFL metafunction analysis results with consistency scores and validation data</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: rgba(233, 30, 99, 0.1); border-radius: 12px; border-left: 3px solid var(--cache-color);">
+                    <h4 style="color: var(--cache-color); margin-bottom: 0.5rem;">Cache Strategy</h4>
+                    <p style="font-size: 0.9rem; color: #666;">TTL-based expiration, LRU eviction, and performance hit rate >80% target with Redis sorted sets for efficient ranking</p>
+                </div>
+            </div>
+
+            <!-- Storage Section -->
+            <div class="storage-section">
+                <div class="section-title storage-title">
+                    💾 PostgreSQL Storage
+                </div>
+
+                <div class="component-grid">
+                    <div class="component-card storage-card">
+                        <div class="component-title">Documents Table</div>
+                        <div class="component-desc">Original text with metadata, processing status, and quality metrics tracking</div>
+                    </div>
+
+                    <div class="component-card storage-card">
+                        <div class="component-title">Linguistic Annotations</div>
+                        <div class="component-desc">JSONB storage for POS tags, NER entities, dependencies, and complete SFL analysis</div>
+                    </div>
+
+                    <div class="component-card storage-card">
+                        <div class="component-title">Document Embeddings</div>
+                        <div class="component-desc">pgvector storage with similarity indexes for semantic search and retrieval</div>
+                    </div>
+
+                    <div class="component-card storage-card">
+                        <div class="component-title">Session Archive</div>
+                        <div class="component-desc">Complete processing history with pipeline metrics and agent coordination logs</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: rgba(46, 125, 50, 0.1); border-radius: 12px; border-left: 3px solid var(--storage-color);">
+                    <h4 style="color: var(--storage-color); margin-bottom: 0.5rem;">Storage Features</h4>
+                    <p style="font-size: 0.9rem; color: #666;">JSONB indexes, pgvector similarity search, deterministic UUIDs, and audit trail capabilities</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Flow Arrows -->
+        <div class="flow-arrows">
+            <div class="arrow arrow-1 horizontal-arrow"></div>
+            <div class="arrow arrow-2 horizontal-arrow"></div>
+            <div class="arrow arrow-3 horizontal-arrow"></div>
+            <div class="arrow arrow-4 horizontal-arrow"></div>
+
+            <div class="arrow arrow-cache-1 diagonal-arrow"></div>
+            <div class="arrow arrow-cache-2 diagonal-arrow"></div>
+            <div class="arrow arrow-cache-3 diagonal-arrow"></div>
+
+            <div class="arrow arrow-storage-1 horizontal-arrow"></div>
+        </div>
+
+        <!-- Session Management -->
+        <div class="session-flow">
+            <div class="session-content">
+                <h2>Session State Management</h2>
+                <p>Complete session lifecycle with state tracking, correlation IDs, and seamless stage transitions</p>
+
+                <div class="session-steps">
+                    <div class="session-step">
+                        <div class="step-number">1</div>
+                        <h4>Session Initialize</h4>
+                        <p>Create correlation ID and processing session with pipeline metadata</p>
+                    </div>
+                    <div class="session-step">
+                        <div class="step-number">2</div>
+                        <h4>Stage Tracking</h4>
+                        <p>Track progress through each pipeline stage with intermediate results</p>
+                    </div>
+                    <div class="session-step">
+                        <div class="step-number">3</div>
+                        <h4>Cache Population</h4>
+                        <p>Store intermediate results in specialized cache models for performance</p>
+                    </div>
+                    <div class="session-step">
+                        <div class="step-number">4</div>
+                        <h4>Quality Gates</h4>
+                        <p>Validate SFL consistency and processing quality at each stage</p>
+                    </div>
+                    <div class="session-step">
+                        <div class="step-number">5</div>
+                        <h4>Session Complete</h4>
+                        <p>Mark session complete and trigger archival process to PostgreSQL</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Archival Process -->
+        <div class="archival-process">
+            <h2>Automated Archival Process</h2>
+            <p>Selective archival from Redis to PostgreSQL with data retention and optimization</p>
+
+            <div class="archival-grid">
+                <div class="archival-item">
+                    <h4>Session Completion</h4>
+                    <p>Triggered when all pipeline stages complete successfully or after timeout</p>
+                </div>
+                <div class="archival-item">
+                    <h4>Data Selection</h4>
+                    <p>Archive valuable cache data while discarding temporary processing artifacts</p>
+                </div>
+                <div class="archival-item">
+                    <h4>JSONB Storage</h4>
+                    <p>Store linguistic annotations in JSONB with queryable structure and indexes</p>
+                </div>
+                <div class="archival-item">
+                    <h4>Vector Persistence</h4>
+                    <p>Save embeddings to pgvector with similarity indexes for semantic search</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="performance-metrics">
+            <h2 style="color: var(--utility); margin-bottom: 1.5rem;">Performance Metrics</h2>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value">&gt;80%</div>
+                    <div class="metric-label">Cache Hit Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">&lt;500ms</div>
+                    <div class="metric-label">Stage Transition Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">1000+</div>
+                    <div class="metric-label">Documents/Hour</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">&lt;2GB</div>
+                    <div class="metric-label">Memory Usage (10K docs)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">≥85%</div>
+                    <div class="metric-label">SFL Consistency Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">24/7</div>
+                    <div class="metric-label">Availability Target</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

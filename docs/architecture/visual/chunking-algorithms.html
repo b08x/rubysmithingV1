@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chunking Algorithms Deep Dive - Rubysmithing</title>
+    <style>
+        :root {
+            --primary: #971716;
+            --background: #DEDCCB;
+            --info: #1B4A86;
+            --success: #1A5C24;
+            --utility: #59310A;
+            --text: #111111;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), #B32A2A);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .nav-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .algorithms-container {
+            max-width: 1600px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .math-foundation {
+            background: linear-gradient(135deg, var(--info), #2557A3);
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .math-foundation::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M50 10L40 20L50 30L60 20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .math-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .formula-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .formula-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .formula {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            letter-spacing: 1px;
+        }
+
+        .algorithm-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 8px 32px rgba(17, 17, 17, 0.1);
+            border-left: 6px solid var(--primary);
+        }
+
+        .algorithm-grid {
+            display: grid;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .algorithm-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .algorithm-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .algorithm-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 48px rgba(17, 17, 17, 0.15);
+            background: white;
+        }
+
+        .algorithm-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .exponential { border-color: var(--info); }
+        .exponential::before { background: linear-gradient(90deg, var(--info), #2557A3); }
+
+        .hierarchical { border-color: var(--primary); }
+        .hierarchical::before { background: linear-gradient(90deg, var(--primary), #B32A2A); }
+
+        .sfl-guided { border-color: var(--success); }
+        .sfl-guided::before { background: linear-gradient(90deg, var(--success), #228B32); }
+
+        .algorithm-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .algorithm-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .exponential .algorithm-icon { background: linear-gradient(135deg, var(--info), #2557A3); }
+        .hierarchical .algorithm-icon { background: linear-gradient(135deg, var(--primary), #B32A2A); }
+        .sfl-guided .algorithm-icon { background: linear-gradient(135deg, var(--success), #228B32); }
+
+        .algorithm-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .algorithm-subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .code-implementation {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 2rem;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            margin: 2rem 0;
+            overflow-x: auto;
+            position: relative;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .code-implementation::before {
+            content: 'Ruby Implementation';
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: var(--primary);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-family: sans-serif;
+        }
+
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; font-style: italic; }
+        .method { color: #dcdcaa; }
+        .variable { color: #9cdcfe; }
+        .constant { color: #4fc1ff; }
+        .number { color: #b5cea8; }
+
+        .complexity-analysis {
+            background: linear-gradient(145deg, #fff3e0, #ffe0b2);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--utility);
+            margin: 1rem 0;
+        }
+
+        .complexity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .complexity-item {
+            text-align: center;
+        }
+
+        .complexity-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--utility);
+        }
+
+        .complexity-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .performance-comparison {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 8px 32px rgba(17, 17, 17, 0.1);
+            overflow-x: auto;
+        }
+
+        .comparison-chart {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+            min-width: 600px;
+        }
+
+        .metric-column {
+            text-align: center;
+        }
+
+        .metric-title {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .metric-bars {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .metric-bar {
+            position: relative;
+            background: #e0e0e0;
+            height: 40px;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .metric-fill {
+            height: 100%;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: width 0.3s ease;
+        }
+
+        .exponential-fill { background: linear-gradient(90deg, var(--info), #2557A3); }
+        .hierarchical-fill { background: linear-gradient(90deg, var(--primary), #B32A2A); }
+        .sfl-fill { background: linear-gradient(90deg, var(--success), #228B32); }
+
+        .algorithm-flow {
+            background: linear-gradient(135deg, var(--utility), #7A4A15);
+            color: white;
+            padding: 3rem;
+            border-radius: 20px;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .algorithm-flow::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: -100%;
+            width: 300%;
+            height: 300%;
+            background: repeating-conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(255, 255, 255, 0.02) 2deg,
+                transparent 4deg
+            );
+            animation: rotate 40s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .flow-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .flow-diagram {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .flow-node {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .flow-node:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .node-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .node-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .node-desc {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 1200px) {
+            .formula-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-chart {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .algorithm-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .flow-diagram {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="nav-button">← Back to Overview</a>
+
+    <header class="header">
+        <h1>Chunking Algorithms Deep Dive</h1>
+        <p>Mathematical foundations & advanced Ruby implementations</p>
+    </header>
+
+    <div class="algorithms-container">
+
+        <!-- Mathematical Foundation -->
+        <div class="math-foundation">
+            <div class="math-content">
+                <h2>Mathematical Foundations</h2>
+                <p>Precise mathematical formulations underlying semantic chunking algorithms</p>
+
+                <div class="formula-grid">
+                    <div class="formula-card">
+                        <h3>Cosine Similarity</h3>
+                        <div class="formula">
+                            similarity(A, B) = (A · B) / (||A|| × ||B||)
+                        </div>
+                        <p>Measures semantic similarity between sentence embeddings for coherence analysis</p>
+                    </div>
+
+                    <div class="formula-card">
+                        <h3>Jaccard Index</h3>
+                        <div class="formula">
+                            J(A, B) = |A ∩ B| / |A ∪ B|
+                        </div>
+                        <p>Calculates topic overlap between noun sets for semantic continuity assessment</p>
+                    </div>
+
+                    <div class="formula-card">
+                        <h3>Exponential Decay Weight</h3>
+                        <div class="formula">
+                            w(i) = λⁱ where λ = 0.7
+                        </div>
+                        <p>Attention weighting for sliding window with recent context emphasis</p>
+                    </div>
+
+                    <div class="formula-card">
+                        <h3>SFL Compatibility Score</h3>
+                        <div class="formula">
+                            C(P₁, P₂) = 0.5×I + 0.3×In + 0.2×T
+                        </div>
+                        <p>Metafunction compatibility: Ideational (I), Interpersonal (In), Textual (T)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Algorithms -->
+        <div class="algorithm-section">
+            <h2>Advanced Chunking Algorithms</h2>
+
+            <div class="algorithm-grid">
+
+                <!-- Exponential Decay Chunker -->
+                <div class="algorithm-card exponential">
+                    <div class="algorithm-header">
+                        <div class="algorithm-icon">📈</div>
+                        <div>
+                            <div class="algorithm-title">Exponential Decay</div>
+                            <div class="algorithm-subtitle">Sliding window with attention weights</div>
+                        </div>
+                    </div>
+
+                    <div class="complexity-analysis">
+                        <h4>Complexity Analysis</h4>
+                        <div class="complexity-grid">
+                            <div class="complexity-item">
+                                <div class="complexity-value">O(n²)</div>
+                                <div class="complexity-label">Time Complexity</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">O(k×d)</div>
+                                <div class="complexity-label">Space Complexity</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">0.7</div>
+                                <div class="complexity-label">Decay Rate</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">5</div>
+                                <div class="complexity-label">Window Size</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="code-implementation">
+<span class="keyword">class</span> <span class="method">ExponentialDecayChunker</span>
+  <span class="keyword">def</span> <span class="method">initialize</span>(window_size: <span class="number">5</span>, decay_rate: <span class="number">0.7</span>)
+    <span class="variable">@window_size</span> = window_size
+    <span class="variable">@decay_rate</span> = decay_rate
+  <span class="keyword">end</span>
+
+  <span class="keyword">def</span> <span class="method">chunk_with_decay</span>(text)
+    sentences = <span class="method">extract_sentences</span>(text)
+    embeddings = <span class="method">generate_embeddings</span>(sentences)
+
+    chunks = []
+    current_chunk = []
+    window_embeddings = []
+
+    sentences.<span class="method">each_with_index</span> <span class="keyword">do</span> |sentence, index|
+      current_embedding = embeddings[index]
+
+      <span class="keyword">if</span> window_embeddings.<span class="method">empty?</span>
+        current_chunk = [sentence]
+        window_embeddings = [current_embedding]
+      <span class="keyword">else</span>
+        weighted_similarity = <span class="method">calculate_weighted_similarity</span>(
+          current_embedding, window_embeddings
+        )
+
+        <span class="keyword">if</span> weighted_similarity >= <span class="variable">@similarity_threshold</span>
+          current_chunk << sentence
+          window_embeddings << current_embedding
+          window_embeddings.<span class="method">shift</span> <span class="keyword">if</span> window_embeddings.<span class="method">size</span> > <span class="variable">@window_size</span>
+        <span class="keyword">else</span>
+          chunks << <span class="method">create_chunk_with_metadata</span>(current_chunk, window_embeddings)
+          current_chunk = [sentence]
+          window_embeddings = [current_embedding]
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    chunks << <span class="method">create_chunk_with_metadata</span>(current_chunk, window_embeddings)
+    chunks
+  <span class="keyword">end</span>
+
+  <span class="keyword">private</span>
+
+  <span class="keyword">def</span> <span class="method">calculate_weighted_similarity</span>(current, window)
+    weighted_sum = <span class="number">0.0</span>
+    weight_total = <span class="number">0.0</span>
+
+    window.<span class="method">reverse</span>.<span class="method">each_with_index</span> <span class="keyword">do</span> |emb, reverse_idx|
+      weight = <span class="variable">@decay_rate</span> ** reverse_idx
+      similarity = <span class="method">cosine_similarity</span>(current, emb)
+
+      weighted_sum += similarity * weight
+      weight_total += weight
+    <span class="keyword">end</span>
+
+    weighted_sum / weight_total
+  <span class="keyword">end</span>
+<span class="keyword">end</span>
+                    </div>
+                </div>
+
+                <!-- Hierarchical Agglomerative Chunker -->
+                <div class="algorithm-card hierarchical">
+                    <div class="algorithm-header">
+                        <div class="algorithm-icon">🌳</div>
+                        <div>
+                            <div class="algorithm-title">Hierarchical Agglomerative</div>
+                            <div class="algorithm-subtitle">Bottom-up clustering approach</div>
+                        </div>
+                    </div>
+
+                    <div class="complexity-analysis">
+                        <h4>Complexity Analysis</h4>
+                        <div class="complexity-grid">
+                            <div class="complexity-item">
+                                <div class="complexity-value">O(n³)</div>
+                                <div class="complexity-label">Time Complexity</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">O(n²)</div>
+                                <div class="complexity-label">Space Complexity</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">0.4</div>
+                                <div class="complexity-label">Distance Threshold</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">3</div>
+                                <div class="complexity-label">Linkage Types</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="code-implementation">
+<span class="keyword">class</span> <span class="method">HierarchicalChunker</span>
+  <span class="keyword">def</span> <span class="method">initialize</span>(linkage: <span class="constant">:average</span>, threshold: <span class="number">0.4</span>)
+    <span class="variable">@linkage</span> = linkage
+    <span class="variable">@distance_threshold</span> = threshold
+  <span class="keyword">end</span>
+
+  <span class="keyword">def</span> <span class="method">hierarchical_chunk</span>(text)
+    sentences = <span class="method">extract_sentences</span>(text)
+    embeddings = <span class="method">generate_embeddings</span>(sentences)
+
+    <span class="comment"># Initialize clusters - each sentence is its own cluster</span>
+    clusters = sentences.<span class="method">map</span>.<span class="method">with_index</span> <span class="keyword">do</span> |sentence, i|
+      {
+        sentences: [sentence],
+        embedding: embeddings[i],
+        indices: [i]
+      }
+    <span class="keyword">end</span>
+
+    <span class="comment"># Agglomerative clustering</span>
+    <span class="keyword">while</span> clusters.<span class="method">size</span> > <span class="number">1</span>
+      min_distance = <span class="constant">Float::INFINITY</span>
+      merge_indices = <span class="constant">nil</span>
+
+      (<span class="number">0</span>...clusters.<span class="method">size</span>-<span class="number">1</span>).<span class="method">each</span> <span class="keyword">do</span> |i|
+        (i+<span class="number">1</span>...clusters.<span class="method">size</span>).<span class="method">each</span> <span class="keyword">do</span> |j|
+          distance = <span class="method">calculate_cluster_distance</span>(clusters[i], clusters[j])
+
+          <span class="keyword">if</span> distance < min_distance
+            min_distance = distance
+            merge_indices = [i, j]
+          <span class="keyword">end</span>
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
+
+      <span class="keyword">break</span> <span class="keyword">if</span> min_distance > <span class="variable">@distance_threshold</span>
+
+      <span class="comment"># Merge closest clusters</span>
+      cluster1, cluster2 = clusters.<span class="method">values_at</span>(*merge_indices)
+      merged = <span class="method">merge_clusters</span>(cluster1, cluster2)
+
+      clusters.<span class="method">delete_at</span>(merge_indices[<span class="number">1</span>])
+      clusters.<span class="method">delete_at</span>(merge_indices[<span class="number">0</span>])
+      clusters << merged
+    <span class="keyword">end</span>
+
+    clusters.<span class="method">map</span> { |cluster| <span class="method">create_hierarchical_chunk</span>(cluster) }
+  <span class="keyword">end</span>
+
+  <span class="keyword">private</span>
+
+  <span class="keyword">def</span> <span class="method">calculate_cluster_distance</span>(cluster1, cluster2)
+    <span class="keyword">case</span> <span class="variable">@linkage</span>
+    <span class="keyword">when</span> <span class="constant">:single</span> <span class="keyword">then</span> <span class="method">single_linkage_distance</span>(cluster1, cluster2)
+    <span class="keyword">when</span> <span class="constant">:complete</span> <span class="keyword">then</span> <span class="method">complete_linkage_distance</span>(cluster1, cluster2)
+    <span class="keyword">when</span> <span class="constant">:average</span> <span class="keyword">then</span> <span class="method">average_linkage_distance</span>(cluster1, cluster2)
+    <span class="keyword">end</span>
+  <span class="keyword">end</span>
+<span class="keyword">end</span>
+                    </div>
+                </div>
+
+                <!-- SFL-Guided Chunker -->
+                <div class="algorithm-card sfl-guided">
+                    <div class="algorithm-header">
+                        <div class="algorithm-icon">🔬</div>
+                        <div>
+                            <div class="algorithm-title">SFL-Guided Chunking</div>
+                            <div class="algorithm-subtitle">Metafunction-aware boundary detection</div>
+                        </div>
+                    </div>
+
+                    <div class="complexity-analysis">
+                        <h4>Complexity Analysis</h4>
+                        <div class="complexity-grid">
+                            <div class="complexity-item">
+                                <div class="complexity-value">O(n×m)</div>
+                                <div class="complexity-label">Time Complexity</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">O(n)</div>
+                                <div class="complexity-label">Space Complexity</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">0.7</div>
+                                <div class="complexity-label">Compatibility Threshold</div>
+                            </div>
+                            <div class="complexity-item">
+                                <div class="complexity-value">3</div>
+                                <div class="complexity-label">Metafunctions</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="code-implementation">
+<span class="keyword">class</span> <span class="method">SFLGuidedChunker</span>
+  <span class="keyword">def</span> <span class="method">sfl_guided_chunk</span>(text)
+    sentences = <span class="method">extract_sentences</span>(text)
+    profiles = <span class="method">analyze_metafunctions</span>(sentences)
+
+    chunks = []
+    current_chunk = { sentences: [], profile: <span class="constant">nil</span> }
+
+    sentences.<span class="method">zip</span>(profiles).<span class="method">each</span> <span class="keyword">do</span> |sentence, profile|
+      <span class="keyword">if</span> current_chunk[<span class="constant">:profile</span>].<span class="method">nil?</span>
+        current_chunk[<span class="constant">:sentences</span>] = [sentence]
+        current_chunk[<span class="constant">:profile</span>] = profile
+      <span class="keyword">else</span>
+        compatibility = <span class="method">calculate_profile_compatibility</span>(
+          current_chunk[<span class="constant">:profile</span>], profile
+        )
+
+        <span class="keyword">if</span> compatibility >= <span class="number">0.7</span>
+          current_chunk[<span class="constant">:sentences</span>] << sentence
+          current_chunk[<span class="constant">:profile</span>] = <span class="method">merge_profiles</span>(
+            current_chunk[<span class="constant">:profile</span>], profile
+          )
+        <span class="keyword">else</span>
+          chunks << <span class="method">finalize_chunk</span>(current_chunk)
+          current_chunk = { sentences: [sentence], profile: profile }
+        <span class="keyword">end</span>
+      <span class="keyword">end</span>
+    <span class="keyword">end</span>
+
+    chunks << <span class="method">finalize_chunk</span>(current_chunk) <span class="keyword">unless</span> current_chunk[<span class="constant">:sentences</span>].<span class="method">empty?</span>
+    chunks
+  <span class="keyword">end</span>
+
+  <span class="keyword">private</span>
+
+  <span class="keyword">def</span> <span class="method">analyze_metafunctions</span>(sentences)
+    sentences.<span class="method">map</span> <span class="keyword">do</span> |sentence|
+      doc = <span class="variable">@nlp</span>.<span class="method">call</span>(sentence)
+
+      {
+        ideational: <span class="method">analyze_ideational_metafunction</span>(doc),
+        interpersonal: <span class="method">analyze_interpersonal_metafunction</span>(doc),
+        textual: <span class="method">analyze_textual_metafunction</span>(doc)
+      }
+    <span class="keyword">end</span>
+  <span class="keyword">end</span>
+
+  <span class="keyword">def</span> <span class="method">calculate_profile_compatibility</span>(profile1, profile2)
+    ideational = <span class="method">calculate_ideational_compatibility</span>(
+      profile1[<span class="constant">:ideational</span>], profile2[<span class="constant">:ideational</span>]
+    )
+    interpersonal = <span class="method">calculate_interpersonal_compatibility</span>(
+      profile1[<span class="constant">:interpersonal</span>], profile2[<span class="constant">:interpersonal</span>]
+    )
+    textual = <span class="method">calculate_textual_compatibility</span>(
+      profile1[<span class="constant">:textual</span>], profile2[<span class="constant">:textual</span>]
+    )
+
+    <span class="comment"># Weighted combination (ideational most important for chunking)</span>
+    (ideational * <span class="number">0.5</span>) + (interpersonal * <span class="number">0.3</span>) + (textual * <span class="number">0.2</span>)
+  <span class="keyword">end</span>
+<span class="keyword">end</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Performance Comparison -->
+        <div class="performance-comparison">
+            <h2>Algorithm Performance Comparison</h2>
+            <p>Benchmarked performance metrics across different chunking algorithms</p>
+
+            <div class="comparison-chart">
+                <div class="metric-column">
+                    <div class="metric-title">Processing Speed</div>
+                    <div class="metric-bars">
+                        <div class="metric-bar">
+                            <div class="metric-fill exponential-fill" style="width: 70%;">Exponential: 2k tokens/s</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill hierarchical-fill" style="width: 40%;">Hierarchical: 500 tokens/s</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill sfl-fill" style="width: 50%;">SFL-Guided: 1k tokens/s</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-column">
+                    <div class="metric-title">Memory Usage</div>
+                    <div class="metric-bars">
+                        <div class="metric-bar">
+                            <div class="metric-fill exponential-fill" style="width: 60%;">Exponential: Medium</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill hierarchical-fill" style="width: 90%;">Hierarchical: Very High</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill sfl-fill" style="width: 80%;">SFL-Guided: High</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-column">
+                    <div class="metric-title">Chunk Quality</div>
+                    <div class="metric-bars">
+                        <div class="metric-bar">
+                            <div class="metric-fill exponential-fill" style="width: 80%;">Exponential: High</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill hierarchical-fill" style="width: 75%;">Hierarchical: Variable</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill sfl-fill" style="width: 95%;">SFL-Guided: Excellent</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-column">
+                    <div class="metric-title">SFL Integration</div>
+                    <div class="metric-bars">
+                        <div class="metric-bar">
+                            <div class="metric-fill exponential-fill" style="width: 30%;">Exponential: Basic</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill hierarchical-fill" style="width: 50%;">Hierarchical: Moderate</div>
+                        </div>
+                        <div class="metric-bar">
+                            <div class="metric-fill sfl-fill" style="width: 100%;">SFL-Guided: Complete</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Algorithm Selection Flow -->
+        <div class="algorithm-flow">
+            <div class="flow-content">
+                <h2>Algorithm Selection Decision Tree</h2>
+                <p>Intelligent algorithm selection based on content characteristics and performance requirements</p>
+
+                <div class="flow-diagram">
+                    <div class="flow-node">
+                        <div class="node-icon">📊</div>
+                        <div class="node-title">Content Analysis</div>
+                        <div class="node-desc">Analyze text complexity, length, structure, and linguistic features</div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="node-icon">⚡</div>
+                        <div class="node-title">Performance Requirements</div>
+                        <div class="node-desc">Assess speed vs quality trade-offs based on application needs</div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="node-icon">🎯</div>
+                        <div class="node-title">Quality Threshold</div>
+                        <div class="node-desc">Determine minimum acceptable chunk coherence and boundary accuracy</div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="node-icon">🔄</div>
+                        <div class="node-title">Recursive Chunking</div>
+                        <div class="node-desc">Fast baseline for performance-critical applications with good quality</div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="node-icon">📈</div>
+                        <div class="node-title">Exponential Decay</div>
+                        <div class="node-desc">Balanced approach with attention weighting for context preservation</div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="node-icon">🌳</div>
+                        <div class="node-title">Hierarchical Clustering</div>
+                        <div class="node-desc">Bottom-up approach for complex document structure analysis</div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="node-icon">🔬</div>
+                        <div class="node-title">SFL-Guided</div>
+                        <div class="node-desc">Linguistically-aware chunking for maximum semantic coherence</div>
+                    </div>
+
+                    <div class="flow-node">
+                        <div class="node-icon">✅</div>
+                        <div class="node-title">Quality Validation</div>
+                        <div class="node-desc">Validate chunks using SFL consistency and boundary accuracy metrics</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

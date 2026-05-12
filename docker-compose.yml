@@ -1,0 +1,97 @@
+# rubysmithing BDD Development Environment
+# Natural Language → SFL Analysis → User Stories → Gherkin → Implementation → Testing
+
+version: "3.8"
+
+services:
+  # Main development container
+  rubysmithing:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/workspace
+      - gem_cache:/usr/local/bundle
+      - node_modules:/workspace/node_modules
+    environment:
+      - DATABASE_URL=postgresql://rubysmithing:devpass@postgres:5432/rubysmithing_dev
+      - REDIS_URL=redis://redis:6379/0
+      - RAILS_ENV=development
+      - RUBYSMITHING_LOG_LEVEL=DEBUG
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "3000:3000"
+      - "8080:8080"  # For web UI if needed
+    working_dir: /workspace
+    command: bundle exec foreman start
+
+  # PostgreSQL with pgvector for semantic search
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: rubysmithing_dev
+      POSTGRES_USER: rubysmithing
+      POSTGRES_PASSWORD: devpass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
+  # Redis for caching and background jobs
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+
+  # Test runner container
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/workspace
+      - gem_cache:/usr/local/bundle
+    environment:
+      - DATABASE_URL=postgresql://rubysmithing:testpass@test_postgres:5432/rubysmithing_test
+      - RAILS_ENV=test
+      - COVERAGE=true
+    depends_on:
+      - test_postgres
+    working_dir: /workspace
+    command: bundle exec rake test:all
+
+  # Isolated test database
+  test_postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: rubysmithing_test
+      POSTGRES_USER: rubysmithing
+      POSTGRES_PASSWORD: testpass
+    tmpfs:
+      - /var/lib/postgresql/data  # In-memory for faster tests
+
+  # SFL Natural Language Processing service
+  sfl_processor:
+    build:
+      context: ./sfl_processor
+      dockerfile: Dockerfile
+    volumes:
+      - .:/workspace
+      - ./sfl_processor/models:/models
+    environment:
+      - MODEL_PATH=/models
+      - OUTPUT_FORMAT=json
+    ports:
+      - "8181:8181"
+    working_dir: /workspace
+
+volumes:
+  postgres_data:
+  redis_data:
+  gem_cache:
+  node_modules:

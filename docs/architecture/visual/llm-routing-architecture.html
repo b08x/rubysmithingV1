@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Provider LLM Routing - Rubysmithing</title>
+    <style>
+        :root {
+            --primary: #971716;
+            --background: #DEDCCB;
+            --info: #1B4A86;
+            --success: #1A5C24;
+            --utility: #59310A;
+            --text: #111111;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), #B32A2A);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .nav-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .routing-container {
+            max-width: 1600px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .routing-flow {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .analysis-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(17, 17, 17, 0.1);
+            border-left: 6px solid var(--info);
+        }
+
+        .providers-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(17, 17, 17, 0.1);
+            border-left: 6px solid var(--primary);
+        }
+
+        .dspy-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(17, 17, 17, 0.1);
+            border-left: 6px solid var(--success);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .analyzer-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .analyzer-card:hover {
+            border-color: var(--info);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(27, 74, 134, 0.15);
+        }
+
+        .analyzer-card h4 {
+            color: var(--info);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .complexity-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .complexity-level {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            flex: 1;
+        }
+
+        .simple { background: #d4edda; color: #155724; }
+        .moderate { background: #fff3cd; color: #856404; }
+        .complex { background: #f8d7da; color: #721c24; }
+        .expert { background: #d1ecf1; color: #0c5460; }
+
+        .provider-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .provider-card {
+            background: linear-gradient(145deg, white, #f8f9fa);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .provider-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .provider-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .provider-mistral { border-color: var(--primary); }
+        .provider-mistral::before { background: linear-gradient(90deg, var(--primary), #B32A2A); }
+
+        .provider-openrouter { border-color: var(--utility); }
+        .provider-openrouter::before { background: linear-gradient(90deg, var(--utility), #7A4A15); }
+
+        .provider-huggingface { border-color: var(--success); }
+        .provider-huggingface::before { background: linear-gradient(90deg, var(--success), #228B32); }
+
+        .provider-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.15);
+        }
+
+        .provider-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .provider-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .mistral-icon { background: linear-gradient(135deg, var(--primary), #B32A2A); }
+        .openrouter-icon { background: linear-gradient(135deg, var(--utility), #7A4A15); }
+        .huggingface-icon { background: linear-gradient(135deg, var(--success), #228B32); }
+
+        .model-list {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .model-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 3px solid var(--info);
+            font-size: 0.9rem;
+        }
+
+        .model-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .model-specs {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .dspy-card {
+            background: linear-gradient(145deg, #f0f9ff, #e0f2fe);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .dspy-card:hover {
+            border-color: var(--success);
+            transform: translateY(-2px);
+        }
+
+        .dspy-card h4 {
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .routing-arrows {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .arrow {
+            position: absolute;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--info));
+            border-radius: 2px;
+        }
+
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -5px;
+            width: 0;
+            height: 0;
+            border-left: 12px solid var(--info);
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+        }
+
+        .arrow1 {
+            top: 30%;
+            left: 28%;
+            transform: rotate(-15deg);
+        }
+
+        .arrow2 {
+            top: 50%;
+            left: 28%;
+        }
+
+        .arrow3 {
+            top: 70%;
+            left: 28%;
+            transform: rotate(15deg);
+        }
+
+        .arrow4 {
+            top: 30%;
+            right: 28%;
+            transform: rotate(165deg);
+        }
+
+        .arrow5 {
+            top: 50%;
+            right: 28%;
+            transform: rotate(180deg);
+        }
+
+        .arrow6 {
+            top: 70%;
+            right: 28%;
+            transform: rotate(-165deg);
+        }
+
+        .sfl-integration {
+            background: linear-gradient(135deg, var(--info), #2557A3);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin: 3rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sfl-integration::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 20px,
+                rgba(255, 255, 255, 0.03) 20px,
+                rgba(255, 255, 255, 0.03) 40px
+            );
+            animation: drift 25s linear infinite;
+        }
+
+        @keyframes drift {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .sfl-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .metafunctions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .metafunction {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quality-gate {
+            background: linear-gradient(135deg, var(--success), #228B32);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        @media (max-width: 1200px) {
+            .routing-flow {
+                grid-template-columns: 1fr;
+            }
+
+            .metafunctions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="nav-button">← Back to Overview</a>
+
+    <header class="header">
+        <h1>Multi-Provider LLM Routing Architecture</h1>
+        <p>Intelligent routing with complexity analysis & SFL content classification</p>
+    </header>
+
+    <div class="routing-container">
+        <div class="routing-flow">
+
+            <!-- Analysis Section -->
+            <div class="analysis-section">
+                <div class="section-title">
+                    📊 Routing Analysis
+                </div>
+
+                <div class="analyzer-card">
+                    <h4>Complexity Analyzer</h4>
+                    <p>Analyzes text structure, length, technical keywords, and question complexity</p>
+
+                    <div class="complexity-indicator">
+                        <div class="complexity-level simple">Simple ≤0.3</div>
+                        <div class="complexity-level moderate">Moderate ≤0.6</div>
+                        <div class="complexity-level complex">Complex ≤0.8</div>
+                        <div class="complexity-level expert">Expert >0.8</div>
+                    </div>
+                </div>
+
+                <div class="analyzer-card">
+                    <h4>SFL Content Analyzer</h4>
+                    <p>Classifies content using Systemic Functional Linguistics metafunctions</p>
+
+                    <div style="margin-top: 1rem;">
+                        <div style="background: #e3f2fd; padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0;">
+                            <strong>Ideational:</strong> Process types & participant roles
+                        </div>
+                        <div style="background: #f3e5f5; padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0;">
+                            <strong>Interpersonal:</strong> Modality & speech functions
+                        </div>
+                        <div style="background: #e8f5e8; padding: 0.5rem; border-radius: 6px; margin: 0.5rem 0;">
+                            <strong>Textual:</strong> Theme/Rheme & cohesion
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analyzer-card">
+                    <h4>Routing Decision Engine</h4>
+                    <p>Combines complexity scores with SFL analysis for optimal provider selection</p>
+                </div>
+            </div>
+
+            <!-- Providers Section -->
+            <div class="providers-section">
+                <div class="section-title">
+                    🌐 LLM Provider Ecosystem
+                </div>
+
+                <div class="provider-grid">
+                    <div class="provider-card provider-mistral">
+                        <div class="provider-header">
+                            <div class="provider-icon mistral-icon">M</div>
+                            <div>
+                                <h3>Mistral Direct</h3>
+                                <p>Native Mistral API for high-performance reasoning</p>
+                            </div>
+                        </div>
+                        <div class="model-list">
+                            <div class="model-item">
+                                <div class="model-name">mistral-medium-3.5</div>
+                                <div class="model-specs">32K context • $2.70/$8.10 per 1M tokens</div>
+                            </div>
+                            <div class="model-item">
+                                <div class="model-name">codestral</div>
+                                <div class="model-specs">32K context • Specialized for code</div>
+                            </div>
+                            <div class="model-item">
+                                <div class="model-name">mistral-small</div>
+                                <div class="model-specs">32K context • Fast lightweight tasks</div>
+                            </div>
+                            <div class="model-item">
+                                <div class="model-name">mistral-nemo</div>
+                                <div class="model-specs">128K context • Balanced performance</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="provider-card provider-openrouter">
+                        <div class="provider-header">
+                            <div class="provider-icon openrouter-icon">O</div>
+                            <div>
+                                <h3>OpenRouter</h3>
+                                <p>Access to open-source models & embeddings</p>
+                            </div>
+                        </div>
+                        <div class="model-list">
+                            <div class="model-item">
+                                <div class="model-name">mistral-embed</div>
+                                <div class="model-specs">Embedding model • $0.10 per 1M tokens</div>
+                            </div>
+                            <div class="model-item">
+                                <div class="model-name">qwen-2.5-72b</div>
+                                <div class="model-specs">32K context • Advanced reasoning</div>
+                            </div>
+                            <div class="model-item">
+                                <div class="model-name">llama-3.1-70b</div>
+                                <div class="model-specs">131K context • Open-source flagship</div>
+                            </div>
+                            <div class="model-item">
+                                <div class="model-name">claude-3.5-sonnet</div>
+                                <div class="model-specs">200K context • Premium reasoning</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="provider-card provider-huggingface">
+                        <div class="provider-header">
+                            <div class="provider-icon huggingface-icon">🤗</div>
+                            <div>
+                                <h3>Hugging Face Inference</h3>
+                                <p>Community models & experimental inference</p>
+                            </div>
+                        </div>
+                        <div class="model-list">
+                            <div class="model-item">
+                                <div class="model-name">Mistral-7B-Instruct</div>
+                                <div class="model-specs">4K context • Free tier available</div>
+                            </div>
+                            <div class="model-item">
+                                <div class="model-name">DialoGPT-medium</div>
+                                <div class="model-specs">1K context • Conversation focused</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DSPy Integration Section -->
+            <div class="dspy-section">
+                <div class="section-title">
+                    ⚡ DSPy Integration
+                </div>
+
+                <div class="dspy-card">
+                    <h4>DSPy Predict</h4>
+                    <p><strong>Simple tasks</strong> → Straightforward prediction with minimal reasoning overhead</p>
+                </div>
+
+                <div class="dspy-card">
+                    <h4>DSPy ChainOfThought</h4>
+                    <p><strong>Analysis tasks</strong> → Step-by-step reasoning with intermediate outputs</p>
+                </div>
+
+                <div class="dspy-card">
+                    <h4>DSPy ReAct</h4>
+                    <p><strong>Complex reasoning</strong> → Agent-based reasoning with tool integration</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Routing Arrows -->
+        <div class="routing-arrows">
+            <div class="arrow arrow1"></div>
+            <div class="arrow arrow2"></div>
+            <div class="arrow arrow3"></div>
+            <div class="arrow arrow4"></div>
+            <div class="arrow arrow5"></div>
+            <div class="arrow arrow6"></div>
+        </div>
+
+        <!-- SFL Integration Section -->
+        <div class="sfl-integration">
+            <div class="sfl-content">
+                <h2>SFL Metafunction Integration</h2>
+                <p>Routing decisions enhanced by Systemic Functional Linguistics analysis for semantically-aware provider selection</p>
+
+                <div class="metafunctions">
+                    <div class="metafunction">
+                        <h4>Ideational</h4>
+                        <p>Material processes → OpenRouter<br>Mental processes → Mistral Direct<br>Relational/Verbal → Context-aware routing</p>
+                    </div>
+                    <div class="metafunction">
+                        <h4>Interpersonal</h4>
+                        <p>High modality → Expert models<br>Low modality → Lightweight models<br>Speech functions influence complexity scoring</p>
+                    </div>
+                    <div class="metafunction">
+                        <h4>Textual</h4>
+                        <p>Theme patterns affect provider selection<br>Cohesion markers guide model choice<br>Information structure informs routing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quality Gate -->
+        <div class="quality-gate">
+            <h3>SFL Consistency Gate</h3>
+            <p><strong>Threshold: 85%</strong> - Output must maintain SFL consistency across metafunctions before delivery</p>
+            <p>Failed consistency triggers automatic re-routing with alternative provider/model combination</p>
+        </div>
+
+    </div>
+</body>
+</html>

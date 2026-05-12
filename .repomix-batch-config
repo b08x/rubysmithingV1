@@ -1,0 +1,10 @@
+{
+  "target_dir": "/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1",
+  "output_dir": "./rubysmithing-compressed",
+  "output_style": "markdown",
+  "compress": true,
+  "gen_ignore": true,
+  "pack_whole_target": false,
+  "selected_dirs": "agents\nassets\nbin\ncommands\nconfig\nlib\nreferences\nscripts\nskills\n",
+  "selected_subdirs": {}
+}
