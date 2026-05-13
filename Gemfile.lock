@@ -187,6 +187,7 @@ GEM
     kramdown-parser-gfm (1.1.0)
       kramdown (~> 2.0)
     language_server-protocol (3.17.0.5)
+    lingua (0.6.2)
     lint_roller (1.1.0)
     lipgloss (0.2.2-aarch64-linux-gnu)
     lipgloss (0.2.2-aarch64-linux-musl)
@@ -243,6 +244,7 @@ GEM
     pp (0.6.3)
       prettyprint
     pragmatic_segmenter (0.3.24)
+    prettier_print (1.2.1)
     prettyprint (0.2.0)
     prism (1.9.0)
     pry (0.16.0)
@@ -410,6 +412,8 @@ GEM
     sqlite3 (2.9.4-x86_64-linux-gnu)
     sqlite3 (2.9.4-x86_64-linux-musl)
     stringio (3.2.0)
+    syntax_tree (6.3.0)
+      prettier_print (>= 1.2.0)
     sys-uname (1.5.1)
       ffi (~> 1.1)
       memoist3 (~> 1.0.0)
@@ -456,6 +460,7 @@ DEPENDENCIES
   dry-types
   git-lint
   journald-logger
+  lingua (~> 0.6.2)
   lipgloss
   pg
   pgvector
@@ -483,6 +488,7 @@ DEPENDENCIES
   simplecov
   solargraph
   sqlite3
+  syntax_tree (~> 6.3)
   tty-config (~> 0.6.0)
   yajl-ruby
   yard
@@ -566,6 +572,7 @@ CHECKSUMS
   kramdown (2.5.2) sha256=1ba542204c66b6f9111ff00dcc26075b95b220b07f2905d8261740c82f7f02fa
   kramdown-parser-gfm (1.1.0) sha256=fb39745516427d2988543bf01fc4cf0ab1149476382393e0e9c48592f6581729
   language_server-protocol (3.17.0.5) sha256=fd1e39a51a28bf3eec959379985a72e296e9f9acfce46f6a79d31ca8760803cc
+  lingua (0.6.2) sha256=a9f795d7b1615597f66b5c65e220cda0dfece1014495cf76969fb77955c0ee9e
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
   lipgloss (0.2.2-aarch64-linux-gnu) sha256=cb2e5db7fc14d85ec919223b5d16ad6d7be0ced096fec60e9f6e253d1c8718cd
   lipgloss (0.2.2-aarch64-linux-musl) sha256=e9c445531db8aa85efceeab73f09530dc53ed8f5b61aa78ab7fe2d6afb179b30
@@ -608,6 +615,7 @@ CHECKSUMS
   pgvector (0.3.3) sha256=9cad4b69487110b2dc26d57e6ba9ff2cbe72421c09e6d17397bb29e1551d1872
   pp (0.6.3) sha256=2951d514450b93ccfeb1df7d021cae0da16e0a7f95ee1e2273719669d0ab9df6
   pragmatic_segmenter (0.3.24) sha256=3c3709953efc06cd6a81c26bf7eeb083ace6f116932799b77f83b17aef4534c9
+  prettier_print (1.2.1) sha256=a72838b5f23facff21f90a5423cdcdda19e4271092b41f4ea7f50b83929e6ff9
   prettyprint (0.2.0) sha256=2bc9e15581a94742064a3cc8b0fb9d45aae3d03a1baa6ef80922627a0766f193
   prism (1.9.0) sha256=7b530c6a9f92c24300014919c9dcbc055bf4cdf51ec30aed099b06cd6674ef85
   pry (0.16.0) sha256=d76c69065698ed1f85e717bd33d7942c38a50868f6b0673c636192b3d1b6054e
@@ -663,6 +671,7 @@ CHECKSUMS
   sqlite3 (2.9.4-x86_64-linux-gnu) sha256=537a3eda71b1df1336d0055cbebe55a7317c34870c192c7b6b9d8d0be6871847
   sqlite3 (2.9.4-x86_64-linux-musl) sha256=3fc5e865b4be9a85d998203ef8d0c0fdcb92f20acf34a254346ff8a19088efec
   stringio (3.2.0) sha256=c37cb2e58b4ffbd33fe5cd948c05934af997b36e0b6ca6fdf43afa234cf222e1
+  syntax_tree (6.3.0) sha256=56e25a9692c798ec94c5442fe94c5e94af76bef91edc8bb02052cbdecf35f13d
   sys-uname (1.5.1) sha256=784d7e6491b0393c25cbbe5ac38324ac7be9fda083a6094832648af669386d7b
   thor (1.5.0) sha256=e3a9e55fe857e44859ce104a84675ab6e8cd59c650a49106a05f55f136425e73
   tilt (2.7.0) sha256=0d5b9ba69f6a36490c64b0eee9f6e9aad517e20dcc848800a06eb116f08c6ab3

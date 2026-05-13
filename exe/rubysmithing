@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "bundler/setup"
+require "dotenv"
+
+# Load environment from the project root (.env sits one level above exe/).
+Dotenv.overload(File.expand_path("../.env", __dir__))
+
+# Make `lib/` discoverable whether the gem is installed or run from the repo.
+$LOAD_PATH.unshift(File.expand_path("../lib", __dir__))
+
+require "rubysmithing"
+
+# Pre-boot commands: cheap, side-effect-free queries that should be answerable
+# without paying the cost of full initialization.
+case ARGV.first
+when "version", "--version", "-v"
+  puts defined?(Rubysmithing::VERSION) ? Rubysmithing::VERSION : "unknown"
+  exit 0
+end
+
+Rubysmithing.boot!
+
+# Expose the bootstrapped database connection for legacy scripts that still
+# expect a top-level `DB` constant. New code should call `Rubysmithing.db`.
+DB = Rubysmithing.db if Rubysmithing.db
+
+# CLI dispatch placeholder. Replace with `Rubysmithing::CLI.start(ARGV)` once
+# the CLI module lands.
+if ARGV.empty?
+  warn "rubysmithing: boot complete (no command given; CLI not yet implemented)"
+  warn "  mistral_configured=#{!Rubysmithing.config.fetch(:mistral_api_key, default: '').empty?}"
+  warn "  openrouter_configured=#{!Rubysmithing.config.fetch(:openrouter_api_key, default: '').empty?}"
+  exit 0
+end
+
+warn "rubysmithing: unknown command '#{ARGV.first}' (CLI not yet implemented)"
+exit 1

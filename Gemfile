@@ -55,3 +55,7 @@ end
 gem "cucumber", "~> 11.0", group: :test
 
 gem "tty-config", "~> 0.6.0"
+
+gem "syntax_tree", "~> 6.3"
+
+gem "lingua", "~> 0.6.2"
