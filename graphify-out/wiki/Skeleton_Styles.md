@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **styles.rb** (0 connections) — `assets/skeleton/lib/app_name/styles.rb`
+- **styles.rb** (0 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/assets/skeleton/lib/app_name/styles.rb`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `assets/skeleton/lib/app_name/styles.rb`
+- `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/assets/skeleton/lib/app_name/styles.rb`
 
 ## Audit Trail
 

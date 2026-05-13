@@ -1,6 +1,6 @@
 # Integrator
 
-> God node · 10 connections · `lib/rubysmithing/verification/integrator.rb`
+> God node · 10 connections · `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/verification/integrator.rb`
 
 ## Connections by Relation
 

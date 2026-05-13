@@ -4,8 +4,8 @@
 
 ## Key Concepts
 
-- **clause.rb** (1 connections) — `lib/rubysmithing/rag/clause.rb`
-- **Clause** (1 connections) — `lib/rubysmithing/rag/clause.rb`
+- **clause.rb** (1 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/clause.rb`
+- **Clause** (1 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/clause.rb`
 
 ## Relationships
 
@@ -13,7 +13,7 @@
 
 ## Source Files
 
-- `lib/rubysmithing/rag/clause.rb`
+- `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/clause.rb`
 
 ## Audit Trail
 

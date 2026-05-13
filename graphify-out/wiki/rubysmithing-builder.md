@@ -1,16 +1,15 @@
 # rubysmithing-builder
 
-> God node · 15 connections · `agents/rubysmithing-builder.md`
+> God node · 12 connections · `agents/rubysmithing-builder.md`
 
 ## Connections by Relation
 
 ### calls
-- [[rubysmithing-sovereign]] `EXTRACTED`
 - [[/flow Command]] `EXTRACTED`
 - [[/schema Command]] `EXTRACTED`
+- [[/document Command]] `EXTRACTED`
 - [[/translate Command]] `EXTRACTED`
 - [[/vibe Command]] `EXTRACTED`
-- [[/document Command]] `EXTRACTED`
 
 ### conceptually_related_to
 - [[rubysmithing-tester]] `EXTRACTED`
@@ -23,9 +22,7 @@
 - [[Convention Hardening]] `EXTRACTED`
 
 ### references
-- [[rubysmithing-researcher]] `EXTRACTED`
 - [[rubysmithing-auditor]] `EXTRACTED`
-- [[Builder Agent Tool Registration Issue]] `EXTRACTED`
 
 ---
 

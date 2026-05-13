@@ -4,12 +4,12 @@
 
 ## Key Concepts
 
-- **Ingester** (5 connections) — `lib/rubysmithing/rag/ingester.rb`
-- **.generate_embedding()** (3 connections) — `lib/rubysmithing/rag/ingester.rb`
-- **.fake_vector()** (2 connections) — `lib/rubysmithing/rag/ingester.rb`
-- **.ingest()** (2 connections) — `lib/rubysmithing/rag/ingester.rb`
-- **ingester.rb** (1 connections) — `lib/rubysmithing/rag/ingester.rb`
-- **.initialize()** (1 connections) — `lib/rubysmithing/rag/ingester.rb`
+- **Ingester** (5 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/ingester.rb`
+- **.generate_embedding()** (3 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/ingester.rb`
+- **.fake_vector()** (2 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/ingester.rb`
+- **.ingest()** (2 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/ingester.rb`
+- **ingester.rb** (1 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/ingester.rb`
+- **.initialize()** (1 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/ingester.rb`
 
 ## Relationships
 
@@ -17,7 +17,7 @@
 
 ## Source Files
 
-- `lib/rubysmithing/rag/ingester.rb`
+- `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/rag/ingester.rb`
 
 ## Audit Trail
 

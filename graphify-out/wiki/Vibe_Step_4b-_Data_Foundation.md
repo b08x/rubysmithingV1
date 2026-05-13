@@ -15,8 +15,8 @@
 - [[Zeitwerk Compliance]] `INFERRED`
 - [[Vibe Step 1: Tree of Thoughts Exploration]] `EXTRACTED`
 - [[Vibe Step 4: Project Scaffold]] `EXTRACTED`
-- [[context-engineer Agent]] `INFERRED`
 - [[Frozen String Literal Pragma]] `EXTRACTED`
+- [[context-engineer Agent]] `INFERRED`
 - [[Systemic Functional Linguistics (SFL)]] `EXTRACTED`
 - [[Embedding Dimension Locking]] `EXTRACTED`
 - [[Content Hash Idempotency (SHA256)]] `EXTRACTED`

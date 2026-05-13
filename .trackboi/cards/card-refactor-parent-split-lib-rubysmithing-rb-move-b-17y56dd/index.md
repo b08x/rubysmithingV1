@@ -5,13 +5,13 @@ title: "Refactor parent: split lib/rubysmithing.rb + move boot to exe"
 parentId: null
 scope: {"kind":"project","ref":"global"}
 trackId: "track-refactor-decompose-lib-rubysmithing-rb-and-reloc-12z2j3j"
-column: "backlog"
+column: "done"
 rank: "j"
 labels: []
 assignee: null
 fieldValues: {}
 createdAt: "2026-05-13T05:10:44.495Z"
-updatedAt: "2026-05-13T05:10:44.495Z"
+updatedAt: "2026-05-13T10:21:44.219Z"
 createdBy: "agent_01KRBGG5HJT418GCKQJGAESFSQ"
 updatedBy: "agent_01KRBGG5HJT418GCKQJGAESFSQ"
 ---

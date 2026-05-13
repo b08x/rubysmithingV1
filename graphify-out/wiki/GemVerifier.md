@@ -1,6 +1,6 @@
 # GemVerifier
 
-> God node · 13 connections · `lib/rubysmithing/gem_verifier.rb`
+> God node · 13 connections · `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/gem_verifier.rb`
 
 ## Connections by Relation
 

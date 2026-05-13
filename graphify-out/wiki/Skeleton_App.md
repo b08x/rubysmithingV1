@@ -1,0 +1,25 @@
+# Skeleton App
+
+> 1 nodes · cohesion 1.00
+
+## Key Concepts
+
+- **app.rb** (0 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/assets/skeleton/app.rb`
+
+## Relationships
+
+- No strong cross-community connections detected
+
+## Source Files
+
+- `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/assets/skeleton/app.rb`
+
+## Audit Trail
+
+- EXTRACTED: 0 (0%)
+- INFERRED: 0 (0%)
+- AMBIGUOUS: 0 (0%)
+
+---
+
+*Part of the graphify knowledge wiki. See [[index]] to navigate.*

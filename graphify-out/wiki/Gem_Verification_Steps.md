@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **gem_verification_steps.rb** (0 connections) — `features/step_definitions/gem_verification_steps.rb`
+- **gem_verification_steps.rb** (0 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/features/step_definitions/gem_verification_steps.rb`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `features/step_definitions/gem_verification_steps.rb`
+- `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/features/step_definitions/gem_verification_steps.rb`
 
 ## Audit Trail
 

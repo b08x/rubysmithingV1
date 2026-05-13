@@ -4,7 +4,7 @@
 
 ## Key Concepts
 
-- **mcp_integration_steps.rb** (0 connections) — `features/step_definitions/mcp_integration_steps.rb`
+- **mcp_integration_steps.rb** (0 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/features/step_definitions/mcp_integration_steps.rb`
 
 ## Relationships
 
@@ -12,7 +12,7 @@
 
 ## Source Files
 
-- `features/step_definitions/mcp_integration_steps.rb`
+- `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/features/step_definitions/mcp_integration_steps.rb`
 
 ## Audit Trail
 

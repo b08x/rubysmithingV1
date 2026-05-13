@@ -1,6 +1,6 @@
 # ContextCache
 
-> God node · 10 connections · `scripts/context_cache.rb`
+> God node · 10 connections · `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/scripts/context_cache.rb`
 
 ## Connections by Relation
 

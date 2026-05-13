@@ -4,8 +4,8 @@
 
 ## Key Concepts
 
-- **BlueprintSchema** (1 connections) — `lib/rubysmithing/discovery/blueprint_schema.rb`
-- **blueprint_schema.rb** (1 connections) — `lib/rubysmithing/discovery/blueprint_schema.rb`
+- **BlueprintSchema** (1 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/discovery/blueprint_schema.rb`
+- **blueprint_schema.rb** (1 connections) — `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/discovery/blueprint_schema.rb`
 
 ## Relationships
 
@@ -13,7 +13,7 @@
 
 ## Source Files
 
-- `lib/rubysmithing/discovery/blueprint_schema.rb`
+- `/home/b08x/WorkspaceV3/Syncopated/LLMOps/rubysmithingV1/lib/rubysmithing/discovery/blueprint_schema.rb`
 
 ## Audit Trail
 
